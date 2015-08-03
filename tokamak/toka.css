@@ -1,0 +1,46 @@
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #444444;
+}
+
+.rendererView {
+    position: absolute;
+    display: block;
+    height: 100%;
+}
+.console {
+  display: block;
+  margin: 0;
+  width: 100%;
+  font-family: Helvetica Neue, sans-serif;
+  font-size: 35px;
+  font-weight: lighter;
+  appearance: none;
+  box-shadow: none;
+  border-radius: none;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+}
+.console:focus {
+  outline: none;
+}
+.title{
+    color: white;
+    font-weight: lighter;
+    font-size: 32px;
+    font-family: Helvetica Neue, sans-serif;
+}
+#console {
+  font-size: 16px;
+  height: 350px;
+  width: 300px;
+  color: #d4ffe2;
+}
+#container {
+  background-color: #444444;
+}
+.temperature {
+    color: #89ff8f;
+}
