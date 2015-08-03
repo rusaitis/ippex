@@ -9,7 +9,7 @@ IPPEX Plasma Fusion Reactor Simulation (JS).
 * `$npm install -g bower`
 
 ### Now you can simply use Bower to download all the dependencies:
-(they will be placed in bower_components folder)
+(Make sure you're in your main local directory)
 * `$bower install katex`
 * `$bower install jquery`
 * `$bower install pixi`
