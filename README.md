@@ -22,6 +22,13 @@ IPPEX Plasma Fusion Reactor Simulation (JS).
 * `git status`
 * `git pull origin master`
 
+### **[NOTE!]** If your directory is not on a localhost server, you'll have to start up a quick local http-server to bypass crossOrigin javascript security (either that, or start up Chrome or Safari in unsafe mode):
+
+### You can just install the `http-server` module by
+* `$sudo npm i -g http-server`
+
+### then start it by simply
+* `hs .`
 ## Useful git commands:
 
 * `git clone <url> <directory name>`
