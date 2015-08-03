@@ -2,19 +2,21 @@
 IPPEX Plasma Fusion Reactor Simulation (JS)
 
 ## How to get started:
-#Install Node.JS runtime:
-[download it at nodejs.org](http://nodejs.org).
+### Install Node.JS runtime:
+* [download it at nodejs.org](http://nodejs.org).
 
-#Install Bower (a package manager for the web):
-$npm install -g bower
+### Install Bower (a package manager for the web):
+* $npm install -g bower
 
-$bower install katex
-$bower install jquery
-$bower install pixi
-$bower install dat.gui
-$bower install stat.js
+### Now you can simply use Bower to download all the dependencies:
+(they will be placed in bower_components folder)
+* $bower install katex
+* $bower install jquery
+* $bower install pixi
+* $bower install dat.gui
+* $bower install stat.js
 
-#You should now have all the libraries to run the simulations.
+### You should now have all the libraries to run the simulations.
 
 ## Useful git commands:
 
