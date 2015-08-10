@@ -34,6 +34,7 @@ SCORE: 0
 <!-- // <script src="../libs/jquery-mobile/jquery.mobile-1.4.5.min.js"></script> -->
 <script src="../libs/kinematica/ui.js"></script>
 <script src="toka_physics.js"></script>
+<script src="Ziggurat.js"></script>
 <script defer="defer">
 
 //==============================================================================
@@ -94,6 +95,8 @@ function plasmaPathD(arg, phase){
 function plasmaPathN(arg, phase){
         return (plasmaPathD(arg, phase) * Math.sin(arg + phase) + plasmaPath(arg, phase) * Math.cos(arg + phase))/(plasmaPathD(arg, phase) * Math.cos(arg + phase) - plasmaPath(arg, phase) * Math.sin(arg + phase));
 }
+
+var zig = new Ziggurat();
 
 
 //==============================================================================
@@ -285,6 +288,7 @@ function init(){
         dude.newPos.x = 0;
         dude.newPos.y = 0;
         dude.mPerp = 0;
+        dude.speed = zig.nextGaussian();
         // dude.tint = Math.random() * 0xFFFFFF;
         // dude.tint = (0.7+Math.random() * 0.001) * 0xFFFFFF;
         // dude.PIXI.filters.BloomFilter(10);
@@ -440,7 +444,7 @@ function animate() {
         var dude = aliens[i];
         dude.rotation = dude.direction;
 
-        dude.phiRun += dude.w * params.tscale;
+        dude.phiRun += dude.w * params.tscale * dude.speed;
         // dude.phiRun %= Math.PI * 2;
         dude.phi = dude.phiRun + dude.phiStart;
         // dude.phi %= Math.PI * 2;
