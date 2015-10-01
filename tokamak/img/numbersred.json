@@ -1,0 +1,29 @@
+{"frames": {
+
+"red0d.png":
+{
+	"frame": {"x":0,"y":0,"w":320,"h":500},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":320,"h":500},
+	"sourceSize": {"w":320,"h":500},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"red1d.png":
+{
+	"frame": {"x":320,"y":0,"w":320,"h":500},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":320,"h":500},
+	"sourceSize": {"w":320,"h":500},
+	"pivot": {"x":0.5,"y":0.5}
+}},
+"meta": {
+	"app": "http://www.texturepacker.com",	
+	"version": "1.0",
+	"image": "numbersred.png",
+	"format": "RGBA8888",
+	"size": {"w":3200,"h":1150},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:2f213a6b451f9f5719773418dfe80ae8$"
+}}

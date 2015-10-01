@@ -13,7 +13,6 @@ var tauPHe = 15.;      // Helium ash particle confinement time (seconds)
 var rmin = 0.795;
 var rmaj = 2.59;
 var q = 2.3;
-// var q=Math.E*2/3;
 var Nhe = 0; //Helium ash
 var cAsh = 0; //Helium ash coefficient
 
@@ -36,13 +35,11 @@ var densMax = 10;
 var powMax = 10;
 
 var aliens = [];
-var totalDudes = 500;
+var totalDudes = 1000;
 
 var ParticleSpread = 0; //20
 var LarmourRadius = 0; //5
 var ThetaMax = 23; // as multiples of (2PI)
-// var ThetaMax = 92; // as multiples of (2PI)
-
 
 function writeMessage(message) {
       text.setText(message);
@@ -331,7 +328,7 @@ function calcScore(temperature){
         densreal:densreal,
         densmax:densmax,
         Q_phy:Q_phy,
-        P_in:P_in,
+        P_in,P_in,
         P_alpha:P_alpha,
         P_oh:P_oh,
         P_cond:P_cond,

@@ -11,14 +11,17 @@
     <script src="../bower_components/pixi/bin/pixi.min.js"></script>
     <script src="../bower_components/dat.gui/dat.gui.js"></script>
     <script src="../bower_components/stats.js/build/stats.min.js"></script>
+    <script src="../bower_components/jquery/dist/jquery.min.js"></script>
+
 </head>
 
 <body>
-<div id="title" class="title" style="position: absolute; top: 10px; left: 100px;'">
-    <!-- <i class="fa fa-globe fa-inverse fa-3x"></i> -->
+
+<!-- <div id="title" class="title" style="position: absolute; top: 10px; left: 100px;'">
+    <i class="fa fa-globe fa-inverse fa-3x"></i>
     <input type="text" id="status" class="console"></input>
     <textarea type="text" id="console" class="console"></textarea>
-</div>
+</div> -->
 <div id="score" class="title" style="position: absolute; top: 550px; left: 100px;'">
 SCORE: 0
 </div>
@@ -40,7 +43,6 @@ SCORE: 0
 //==============================================================================
 //                                  START
 //==============================================================================
-
 var Params = function() {
   this.scale = 1;
   this.tscale = 4;
@@ -53,9 +55,39 @@ var Params = function() {
   this.showFieldLine = function() { g.visible = !(g.visible); };
 };
 
-var Torus = {R:300, r:200};
+var scale = Math.min(width,height)
+var scaleTorus = 0.3;
+var epsi = rmin/rmaj;
+var rad = 0.2;
+var numscale = 1.5;
+var numwidth = 320 * scale * numscale * 1.e-4;
+var numheight = 500 * scale * numscale * 1.e-4;
+var arrowwidth = 320 * scale * numscale * 1.e-4;
+var arrowheight = 150 * scale * numscale * 1.e-4;
+
+// alert(scale);
+var Torus = {R:scale * scaleTorus, r:scale * scaleTorus * epsi};
 var Plasma = {v: 1, wSpread: 0.5/1000, T: 10000};
 var params = new Params();
+var ext = {
+    dens : {
+        value : params.Dens,
+        min : 0,
+        max : 10
+    },
+    mag : {
+        value : params.B,
+        min : 1,
+        max : 14
+    },
+    aux : {
+        value : params.Pow,
+        min : 0,
+        max : 10
+    }
+};
+var para1={};
+// console.log(ext.dens.value);
 var gui = new dat.GUI();
 gui.add(params, 'scale', 0.1, 5);
 gui.add(params, 'tscale', 1, 10);
@@ -74,11 +106,11 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function plasmaPath(arg, phase){
+function plasmaPath(arg, phase, eps){
         // return (0.5 + 0.5 * Math.pow((Math.sin(2*arg), 2)));
         // return Math.pow(arg, 2);
         // return 0.5 + 0.5 * Math.pow(Math.sin(2 * (arg + phase)), 2);
-        return 0.5 + 0.5 * Math.pow(Math.sin((arg + phase)/q), 2);  //R between 0.5 and 1
+        return (1-eps) + (2*eps) * Math.pow(Math.sin((arg + phase)/q), 2); 
 }
 function plasmaPathScale(arg, phase){
         // return (0.5 + 0.5 * Math.pow((Math.sin(2*arg), 2)));
@@ -103,9 +135,11 @@ var zig = new Ziggurat();
 //                                BUILD THE SCENE
 //==============================================================================
 
+
 var renderer = PIXI.autoDetectRenderer(width, height, {backgroundColor : 0x0e0e0e});
 document.body.appendChild(renderer.view);
 
+// debugger;
 // create the root of the scene graph
 var stage = new PIXI.Container();
 
@@ -116,7 +150,7 @@ var stage = new PIXI.Container();
 // stage.position.x = renderer.width / 2;
 // stage.position.y = renderer.height / 2;
 
-// stage.interactive = true;
+stage.interactive = true;
 
 var container = new PIXI.Container();
 container.position.x = renderer.width / 2;
@@ -126,29 +160,64 @@ var background = new PIXI.Container();
 background.position.x = renderer.width / 2;
 background.position.y = renderer.height / 2;
 
-var underlay = new PIXI.Container();
-underlay.position.x = renderer.width / 2;
-underlay.position.y = renderer.height / 2;
+var underLay = new PIXI.Container();
+underLay.position.x = renderer.width / 2;
+underLay.position.y = renderer.height / 2;
 
-var overlay = new PIXI.Container();
-overlay.position.x = renderer.width / 2;
-overlay.position.y = renderer.height / 2;
+var rfContainer = new PIXI.Container();
+rfContainer.position.x = renderer.width / 2;
+rfContainer.position.y = renderer.height / 2;
+
+var overLayGlow = new PIXI.Container();
+overLayGlow.position.x = renderer.width / 2;
+overLayGlow.position.y = renderer.height / 2;
+
+var overLay = new PIXI.Container();
+overLay.position.x = renderer.width / 2;
+overLay.position.y = renderer.height / 2;
+
+var auxControls = new PIXI.Container();
+auxControls.position.x = renderer.width * 3/4;
+auxControls.position.y = renderer.height * 3/4;
+
+var magnetControls = new PIXI.Container();
+magnetControls.position.x = renderer.width * 3/4;
+magnetControls.position.y = renderer.height * 1/8;
+
+var densControls = new PIXI.Container();
+densControls.position.x = renderer.width * 1/8;
+densControls.position.y = renderer.height * 3/4;
+
+
 
 stage.addChild(background);
-stage.addChild(underlay);
+stage.addChild(underLay);
 stage.addChild(container);
-stage.addChild(overlay);
+stage.addChild(rfContainer);
+stage.addChild(overLayGlow);
+stage.addChild(overLay);
+stage.addChild(auxControls);
+stage.addChild(magnetControls);
+stage.addChild(densControls);
+
+var frameRectangle = new PIXI.Graphics();
+
+
 
 //IMAGE SOURCES
-var sources = {
-  spark: "img/spark5.png",
-  reactor: "img/reactorBG5.png",
-  coil: "img/coil5.png"
-};
-
+// var sources = {
+//   spark: "img/spark5.png",
+//   reactor: "img/reactorBG5.png",
+//   coil: "img/coil5.png",
+//   rf: "img/rfwave2.png",
+//   numbersRed: "img/numbersred.png"
+// };
+var dudeColorAlpha = [0,0,1,1];
+var dudeColor = dudeColorAlpha.slice(1,4);
 var images = {};
 var g = new PIXI.Graphics();
 var points = [];
+var count = 0;
 
 //IMAGE LOADER (DO THIS FIRST BEFORE PROCESSING SCENE)
 // function loadImages(sources, images, callback) {
@@ -195,6 +264,8 @@ var loader = PIXI.loader; // pixi exposes a premade instance for you to use.
 loader.add('spark',"img/spark5.png");
 loader.add('reactor',"img/reactorBG5.png");
 loader.add('coil',"img/coil5.png");
+loader.add('rf',"img/rfwave2.png");
+loader.add('numbersred',"img/numbersred2.json");
 loader.once('complete',init);
 loader.load();
 
@@ -217,7 +288,7 @@ function init(){
         {
             // var phi = Math.random() * 2 * Math.PI * ThetaMax;
             var phi = 2 * Math.PI * ThetaMax / graphPoints * j;
-            var r = plasmaPath(phi, 0) * Torus.R;
+            var r = plasmaPath(phi, 0, epsi) * Torus.R;
             // pointCurve.push(new PIXI.Point(r * Math.cos(phi), r * Math.sin(phi)));
             // dude.scale.set(0.5 + 0.5 * Math.pow( Math.sin( (dude.phi + dude.phiStart - Math.PI/8) * 2), 2) );
             // dude.alpha = (0.2 + 0.8 * Math.pow( Math.sin( (dude.phi + dude.phiStart - Math.PI/8) * 2), 2) );
@@ -228,11 +299,349 @@ function init(){
         points.push(pointCurve);
     // }
 
+    rfAntenna = new PIXI.Graphics();
+    rfAntenna.x = 0;
+    rfAntenna.y = 0;
+    rfAntenna.beginFill(0x8bc5ff, 0);
+    makeAntenna1(rfAntenna,Torus.R*(1+epsi)*1.1,Torus.R*(1+epsi)*0.8);
+
+
+    rfOutline = new PIXI.Graphics();
+    rfOutline.x = 0;
+    rfOutline.y = 0;
+    rfOutline.lineStyle(5,0x7e7e7e7e);
+    makeAntenna1(rfOutline,Torus.R*(1+epsi)*1.1,Torus.R*(1+epsi)*0.8);
+
+
+
+    rfGreen = new PIXI.Graphics();
+    rfGreen.x = 0;
+    rfGreen.y = 0;
+    rfGreen.beginFill(0x00ff00,0.5);
+    makeAntenna1(rfGreen,Torus.R*(1+epsi)*1.1,Torus.R*(1+epsi)*0.8);
+
+
+
+    waves = new PIXI.Sprite(loader.resources.rf.texture);
+
+    waves.anchor.set(0.5);
+    waves.position.x = Torus.R*(1+epsi);
+    waves.position.y = 0;
+    waves.scale.set(2*Torus.R/400,Torus.R*(1+epsi)*1.1*Math.sin(rad)/150);
+    // alert(2*Torus.R/400);
+    waves.alpha = 0.5;
+    rfContainer.addChild(waves);
+    rfContainer.addChild(rfGreen);
+    rfContainer.addChild(rfAntenna);
+
+    overLay.addChild(rfOutline);
+
+    rfContainer.mask = rfAntenna;
+
+
+
+
+    // rfAntenna.lineTo(Math.cos(0.25/2.75*0.5)*150,Math.sin(0.25/2.75*0.5)*150);
+    // rfAntenna.lineTo(Math.cos(0.25/2.75*0.5)*150*(1+100/150),Math.sin(0.25/2.75*0.5)*150);
+    // rfAntenna.lineTo(Math.cos(1.25/2.75*0.5)*150*(1+100/150),Math.sin(1.25/2.75*0.5)*150);
+    // rfAntenna.lineTo(Math.cos(1.25/2.75*0.5)*150*(1+100/150),Math.sin(1.25/2.75*0.5)*150);
+    // rfAntenna.lineTo(Math.cos(1.75/2.75*0.5)*150*(1+100/150),Math.sin(1.75/2.75*0.5)*150);
+    // rfAntenna.lineTo(Math.cos(1.75/2.75*0.5)*150,Math.sin(-1.75/2.75*0.5)*150);
+    // rfAntenna.lineTo(Math.cos(0.5)*150,Math.sin(0.5)*150);
+    // rfAntenna.lineTo(Math.cos(0.5)*150*(1+200/150),Math.sin(0.5)*150);
+    // rfAntenna.lineTo(Math.cos(1.25/2.75*0.5)*150*(1+200/150),Math.sin(1.25/2.75*0.5)*150);
+    // rfAntenna.lineTo(Math.cos(1.25/2.75*0.5)*150*(1+300/150),Math.sin(1.25/2.75*0.5)*150);
+    // rfAntenna.lineTo(Math.cos(-1.25/2.75*0.5)*150*(1+300/150),Math.sin(-1.25/2.75*0.5)*150);
+    // rfAntenna.lineTo(Math.cos(-1.25/2.75*0.5)*150*(1+200/150),Math.sin(-1.25/2.75*0.5)*150);
+    // rfAntenna.lineTo(Math.cos(-0.5)*150*(1+200/150),Math.sin(-0.5)*150);
+    // rfAntenna.lineTo(Math.cos(-0.5)*150,Math.sin(-0.5)*150);
+
+
+
+
+    // rfAntenna.lineTo(Math.cos(-0.5)*150,Math.sin(-0.5)*150);
+
+    // rfAntenna.lineTo(0,0);    
+
+
+
+
+
+
+    
+
+    //Do the denstity control
+
+    
+
+    
+
+
+    var densContBox = new PIXI.Graphics();
+    densContBox.moveTo(0,0);
+    densContBox.lineStyle(2,0xff0000);
+    densContBox.lineTo(2*numwidth,0);
+    densContBox.lineTo(2*numwidth,numheight+ 2*arrowheight);
+    densContBox.lineTo(0,numheight+2*arrowheight);
+    densContBox.lineTo(0,0);
+
+    var densDigis = [];
+    densTens = new PIXI.Sprite(PIXI.loader.resources["numbersred"].textures["red3d.png"]);
+    densTens.texture = PIXI.loader.resources.numbersred.textures["red1.png"];
+    formatNumber(densTens,-numwidth,arrowheight,numscale);
+
+    densOnes = new PIXI.Sprite(PIXI.loader.resources["numbersred"].textures["red3d.png"]);
+    formatNumber(densOnes,0,arrowheight,numscale);
+    densTenth = new PIXI.Sprite(PIXI.loader.resources.numbersred.textures["red1.png"]);
+    formatNumber(densTenth, numwidth,arrowheight,numscale);
+
+    densDigis[0]=densOnes;
+    densDigis[1]=densTenth;
+
+    // updateDigital(params.Dens,densDigis,1);
+
+    para1 = {
+        obj : ext.dens,
+        dec : 1,
+        arr : densDigis
+    }
+
+    updateDigital(para1.obj, para1.arr, para1.dec);
+
+
+    // magnetControls.alpha = 0.5
+
+    densUpOnes = new PIXI.Sprite(PIXI.loader.resources.numbersred.textures["upred.png"]);
+    densUpOnes.para1 = para1;
+    densUpOnes.para2 = {'dir' : 'up' , 'exp' : 0};
+    buttonize(densUpOnes);
+    formatNumber(densUpOnes,0,0,numscale);
+
+    densDownOnes = new PIXI.Sprite(PIXI.loader.resources.numbersred.textures["downred.png"]);
+    densDownOnes.para1 = para1;
+    densDownOnes.para2 = {'dir' : 'down' , 'exp' : 0};
+    buttonize(densDownOnes);
+    formatNumber(densDownOnes,0,numheight+arrowheight,numscale);
+
+    densUpTenth = new PIXI.Sprite(PIXI.loader.resources.numbersred.textures["upred.png"]);
+    densUpTenth.para1 = para1;
+    densUpTenth.para2 = {'dir' : 'up' , 'exp' : -1};
+    buttonize(densUpTenth);
+    formatNumber(densUpTenth,numwidth,0,numscale);
+
+    densDownTenth = new PIXI.Sprite(PIXI.loader.resources.numbersred.textures["downred.png"]);
+    densDownTenth.para1 = para1;
+    densDownTenth.para2 = {'dir' : 'down' , 'exp' : -1};
+    buttonize(densDownTenth);
+    formatNumber(densDownTenth,numwidth,numheight+arrowheight,numscale);
+
+    densControls.addChild(densContBox);
+    densControls.addChild(densTens);
+    densControls.addChild(densOnes);
+    densControls.addChild(densTenth);
+
+    densControls.addChild(densUpTenth);
+    densControls.addChild(densDownTenth);
+    densControls.addChild(densUpOnes);
+    densControls.addChild(densDownOnes);
+
+    densFilter = new PIXI.filters.ColorMatrixFilter();
+    densFilter.matrix = [
+        1,0,0,0,0,
+        0.,1,0,0,0,
+        1,0,0,0,0,
+        0,0,0,1,0
+        ];
+    densControls.filters = [densFilter];
+    densControls.alpha = 0.5;
+
+
+
+
+//Magnetic Controls
+
+
+
+
+    var magContBox = new PIXI.Graphics();
+    magContBox.moveTo(0,0);
+    magContBox.lineStyle(2,0xff0000);
+    magContBox.lineTo(2*numwidth,0);
+    magContBox.lineTo(2*numwidth,numheight+ 2*arrowheight);
+    magContBox.lineTo(0,numheight+2*arrowheight);
+    magContBox.lineTo(0,0);
+
+    var magDigis = [];
+    magTens = new PIXI.Sprite(PIXI.loader.resources["numbersred"].textures["red3d.png"]);
+    magTens.texture = PIXI.loader.resources.numbersred.textures["red1.png"];
+    formatNumber(magTens,-numwidth,arrowheight,numscale);
+
+    magOnes = new PIXI.Sprite(PIXI.loader.resources["numbersred"].textures["red3d.png"]);
+    formatNumber(magOnes,0,arrowheight,numscale);
+    magTenth = new PIXI.Sprite(PIXI.loader.resources.numbersred.textures["red1.png"]);
+    formatNumber(magTenth, numwidth,arrowheight,numscale);
+
+    magDigis[0]=magOnes;
+    magDigis[1]=magTenth;
+
+
+    para1 = {
+        obj : ext.mag,
+        dec : 1,
+        arr : magDigis
+    }
+
+    updateDigital(para1.obj, para1.arr, para1.dec);
+
+
+
+    magUpOnes = new PIXI.Sprite(PIXI.loader.resources.numbersred.textures["upred.png"]);
+    magUpOnes.para1 = para1;
+    magUpOnes.para2 = {'dir' : 'up' , 'exp' : 0};
+    buttonize(magUpOnes);
+    formatNumber(magUpOnes,0,0,numscale);
+
+    magDownOnes = new PIXI.Sprite(PIXI.loader.resources.numbersred.textures["downred.png"]);
+    magDownOnes.para1 = para1;
+    magDownOnes.para2 = {'dir' : 'down' , 'exp' : 0};
+    buttonize(magDownOnes);
+    formatNumber(magDownOnes,0,numheight+arrowheight,numscale);
+
+    magUpTenth = new PIXI.Sprite(PIXI.loader.resources.numbersred.textures["upred.png"]);
+    magUpTenth.para1 = para1;
+    magUpTenth.para2 = {'dir' : 'up' , 'exp' : -1};
+    buttonize(magUpTenth);
+    formatNumber(magUpTenth,numwidth,0,numscale);
+
+    magDownTenth = new PIXI.Sprite(PIXI.loader.resources.numbersred.textures["downred.png"]);
+    magDownTenth.para1 = para1;
+    magDownTenth.para2 = {'dir' : 'down' , 'exp' : -1};
+    buttonize(magDownTenth);
+    formatNumber(magDownTenth,numwidth,numheight+arrowheight,numscale);
+
+
+
+
+
+    magnetControls.addChild(magContBox);
+    magnetControls.addChild(magTens);
+    magnetControls.addChild(magOnes);
+    magnetControls.addChild(magTenth);
+
+    magnetControls.addChild(magUpTenth);
+    magnetControls.addChild(magDownTenth);
+    magnetControls.addChild(magUpOnes);
+    magnetControls.addChild(magDownOnes);
+
+    magFilter = new PIXI.filters.ColorMatrixFilter();
+    magFilter.matrix = [
+        1,0,0,0,0,
+        0,1,0,0,0,
+        0.,0,1,0,0,
+        0,0,0,1,0
+        ];
+    magnetControls.filters = [magFilter];
+    magnetControls.alpha = 0.5;
+
+
+
+
+//aux power controls
+
+
+    var auxContBox = new PIXI.Graphics();
+    auxContBox.moveTo(0,0);
+    auxContBox.lineStyle(2,0xff0000);
+    auxContBox.lineTo(2*numwidth,0);
+    auxContBox.lineTo(2*numwidth,numheight+ 2*arrowheight);
+    auxContBox.lineTo(0,numheight+2*arrowheight);
+    auxContBox.lineTo(0,0);
+
+    var auxDigis = [];
+    auxTens = new PIXI.Sprite(PIXI.loader.resources["numbersred"].textures["red3d.png"]);
+    auxTens.texture = PIXI.loader.resources.numbersred.textures["red1.png"];
+    formatNumber(auxTens,-numwidth,arrowheight,numscale);
+
+    auxOnes = new PIXI.Sprite(PIXI.loader.resources["numbersred"].textures["red3d.png"]);
+    formatNumber(auxOnes,0,arrowheight,numscale);
+    auxTenth = new PIXI.Sprite(PIXI.loader.resources.numbersred.textures["red1.png"]);
+    formatNumber(auxTenth, numwidth,arrowheight,numscale);
+
+    auxDigis[0]=auxOnes;
+    auxDigis[1]=auxTenth;
+
+
+    para1 = {
+        obj : ext.aux,
+        dec : 1,
+        arr : auxDigis
+    }
+
+    updateDigital(para1.obj, para1.arr, para1.dec);
+
+
+    // magnetControls.alpha = 0.5
+
+    auxUpOnes = new PIXI.Sprite(PIXI.loader.resources.numbersred.textures["upred.png"]);
+    auxUpOnes.para1 = para1;
+    auxUpOnes.para2 = {'dir' : 'up' , 'exp' : 0};
+    buttonize(auxUpOnes);
+    formatNumber(auxUpOnes,0,0,numscale);
+
+    auxDownOnes = new PIXI.Sprite(PIXI.loader.resources.numbersred.textures["downred.png"]);
+    auxDownOnes.para1 = para1;
+    auxDownOnes.para2 = {'dir' : 'down' , 'exp' : 0};
+    buttonize(auxDownOnes);
+    formatNumber(auxDownOnes,0,numheight+arrowheight,numscale);
+
+    auxUpTenth = new PIXI.Sprite(PIXI.loader.resources.numbersred.textures["upred.png"]);
+    auxUpTenth.para1 = para1;
+    auxUpTenth.para2 = {'dir' : 'up' , 'exp' : -1};
+    buttonize(auxUpTenth);
+    formatNumber(auxUpTenth,numwidth,0,numscale);
+
+    auxDownTenth = new PIXI.Sprite(PIXI.loader.resources.numbersred.textures["downred.png"]);
+    auxDownTenth.para1 = para1;
+    auxDownTenth.para2 = {'dir' : 'down' , 'exp' : -1};
+    buttonize(auxDownTenth);
+    formatNumber(auxDownTenth,numwidth,numheight+arrowheight,numscale);
+
+    auxControls.addChild(auxContBox);
+    auxControls.addChild(auxTens);
+    auxControls.addChild(auxOnes);
+    auxControls.addChild(auxTenth);
+
+    auxControls.addChild(auxUpTenth);
+    auxControls.addChild(auxDownTenth);
+    auxControls.addChild(auxUpOnes);
+    auxControls.addChild(auxDownOnes);
+
+    auxFilter = new PIXI.filters.ColorMatrixFilter();
+    auxFilter.matrix = [
+        1,0,0,0,0,
+        0.,1,0,0,0,
+        0.5,0,0.5,0,0,
+        0,0,0,1,0
+        ];
+    auxControls.filters = [auxFilter];
+    auxControls.alpha = 0.5;
+
+
+
+
+
+
+
+
+
+
+
+
 
     g = new PIXI.Graphics();
     g.x = 0;
     g.y = 0;
-    underlay.addChild(g);
+    underLay.addChild(g);
     // g.alpha = (0.1);
     g.visible = false;
 
@@ -246,18 +655,24 @@ function init(){
         // var angle = 2 * Math.PI / fieldLines * i;
         // angle %= 2 * Math.PI;
         var angle = Math.random() * 2 * Math.PI * ThetaMax;
+        var phase = Math.random() * 2 * Math.PI;
+
 
         // create a new Sprite that uses the image name that we just generated as its source
         // var dude =  PIXI.Sprite.fromImage('spark3.png');
         // var dude =  PIXI.Sprite.fromImage(images.spark);
         // var dude =  PIXI.Sprite.fromFrame('img/spark5.png');
-        var dude =  new PIXI.Sprite(loader.resources["spark"].texture);
+        // var dude =  new PIXI.Sprite(loader.resources["spark"].texture);
+        var dude = new PIXI.Graphics();
+        dude.beginFill(0x0000ff);
+        dude.drawCircle(0,0,20);
+        dude.endFill();
 
         dude.group = (Math.cos(angle) > Math.cos(Math.PI/8)) ? 1 : 0;
         if (angle < 1 * Math.PI) dude.label = 'batch';
 
         // set the anchor point so the texture is centerd on the sprite
-        dude.anchor.set(0.5);
+        // dude.anchor.set(0.5);
 
         // set a random scale for the dude - no point them all being the same size!
         // dude.scale.set(1.4 + MatDh.random() * 0.3);
@@ -271,6 +686,7 @@ function init(){
         // dude.phiBias = 0;
         dude.phiRun = 0;
         dude.phiStart = angle;
+        dude.phase = phase;
         // dude.phiBias = rand;
         dude.displ = {};
         // dude.displ.x = (Math.random()-1) * 30;
@@ -279,7 +695,7 @@ function init(){
         dude.displ.y = getRandomReal(-1,1) * ParticleSpread;
         // dude.w = Plasma.w * (Math.random() > 0.5 ? 1 : -1) + Plasma.wSpread * Math.random();
         // dude.w = Plasma.v / dude.R;
-        dude.w = Plasma.v / Torus.R;
+        dude.w = Plasma.v / (Torus.R+Torus.r);
 
         dude.oldPos = {};
         dude.oldPos.x = 0;
@@ -311,46 +727,79 @@ function init(){
     }
 
     // var bg = PIXI.Sprite.fromImage(images.reactor);
-    var bg = new PIXI.Sprite(loader.resources["reactor"].texture);
+    // var bg = new PIXI.Sprite(loader.resources["reactor"].texture);
     // bg.position = ({x:width/2, y:height/2});
     // bg.position.x = (width/2);
     // bg.offset.x = (width/2);
-    bg.anchor.set(0.5);
-    bg.scale.set(1.12,1.12);
+    // bg.anchor.set(0.5);
+    // bg.scale.set(1.12,1.12);
+    var bg = new PIXI.Graphics();
+    bg.lineStyle(2,0x12819e);
+    bg.drawCircle(0,0,(Torus.R+Torus.r) * 1.1);
+    bg.drawCircle(0,0,(Torus.R-Torus.r) * 0.85);
+    bg.lineStyle(10,0x303030);
+    bg.beginFill(0x12819e);
+    bg.drawCircle(0,0,(Torus.R-Torus.r) * 0.5);
+    bg.endFill();
+
+
     background.addChild(bg);
-    bg.zIndex = 2;
+    // bg.zIndex = 2;
 
-    // var coil1 = PIXI.Sprite.fromImage(texture_coil);
-    var coil1 = new PIXI.Sprite(loader.resources["coil"].texture);
-    coil1.position = ({x:-0.75*Torus.R*Math.cos(Math.PI/4), y:-0.75*Torus.R*Math.cos(Math.PI/4)});
-    coil1.anchor.set(0.5);
-    coil1.scale.set(0.5,0.5);
-    coil1.rotation = (Math.PI/4);
-    overlay.addChild(coil1);
 
-    // var coil2 = new PIXI.Sprite.fromImage(texture_coil);
-    var coil2 = new PIXI.Sprite(loader.resources["coil"].texture);
-    coil2.position = ({x:0.75*Torus.R*Math.cos(Math.PI/4), y:-0.75*Torus.R*Math.cos(Math.PI/4)});
-    coil2.anchor.set(0.5);
-    coil2.scale.set(0.5,0.5);
-    coil2.rotation = (-Math.PI/4);
-    overlay.addChild(coil2);
+    coil1g = new PIXI.Graphics();
+    coil1g.beginFill(0x7e7e7e);
+    makeCoil(coil1g,4.3*Torus.r,Torus.r*1.3,1);
+    coil1g.endFill();
+    overLayGlow.addChild(coil1g);
 
-    // var coil3 = new PIXI.Sprite.fromImage('img/spark5.png');
-    var coil3 = new PIXI.Sprite(loader.resources["coil"].texture);
-    coil3.position = ({x:0.75*Torus.R*Math.cos(Math.PI/4), y:0.75*Torus.R*Math.cos(Math.PI/4)});
-    coil3.anchor.set(0.5);
-    coil3.scale.set(0.5,0.5);
-    coil3.rotation = (Math.PI/4);
-    overlay.addChild(coil3);
+    coil2g = new PIXI.Graphics();
+    coil2g.beginFill(0x7e7e7e);
+    makeCoil(coil2g,4.3*Torus.r,Torus.r*1.3,2);
+    coil2g.endFill();
+    overLayGlow.addChild(coil2g);
 
-    // var coil4 = new PIXI.Sprite.fromImage('img/spark5.png');
-    var coil4 = new PIXI.Sprite(loader.resources["coil"].texture);
-    coil4.position = ({x:-0.75*Torus.R*Math.cos(Math.PI/4), y:0.75*Torus.R*Math.cos(Math.PI/4)});
-    coil4.anchor.set(0.5);
-    coil4.scale.set(0.5,0.5);
-    coil4.rotation = (-Math.PI/4);
-    overlay.addChild(coil4);
+    coil3g = new PIXI.Graphics();
+    coil3g.beginFill(0x7e7e7e);
+    makeCoil(coil3g,4.3*Torus.r,Torus.r*1.3,3);
+    coil3g.endFill();
+    overLayGlow.addChild(coil3g);
+
+    coil4g = new PIXI.Graphics();
+    coil4g.beginFill(0x7e7e7e);
+    makeCoil(coil4g,4.3*Torus.r,Torus.r*1.3,4);
+    coil4g.endFill();
+    overLayGlow.addChild(coil4g);
+
+
+    coil1 = new PIXI.Graphics();
+    coil1.beginFill(0x7e7e7e);
+    makeCoil(coil1,3.8*Torus.r,Torus.r,1);
+    coil1.endFill();
+    overLay.addChild(coil1);
+
+    coil2 = new PIXI.Graphics();
+    coil2.beginFill(0x7e7e7e);
+    makeCoil(coil2,3.8*Torus.r,Torus.r,2);
+    coil2.endFill();
+    overLay.addChild(coil2);
+
+    coil3 = new PIXI.Graphics();
+    coil3.beginFill(0x7e7e7e);
+    makeCoil(coil3,3.8*Torus.r,Torus.r,3);
+    coil3.endFill();
+    overLay.addChild(coil3);
+
+    coil4 = new PIXI.Graphics();
+    coil4.beginFill(0x7e7e7e);
+    makeCoil(coil4,3.8*Torus.r,Torus.r,4);
+    coil4.endFill();
+    overLay.addChild(coil4);
+
+    alphaGlow = new PIXI.Graphics();
+    alphaGlow.lineStyle(50,0xff0000);
+    alphaGlow.drawCircle(0,0,(Torus.R));
+    overLayGlow.addChild(alphaGlow);
 
 
     // var colorMatrix =  [
@@ -366,6 +815,13 @@ function init(){
     // var blurFilter1 = new PIXI.filters.BlurFilter();
     // var blurFilter1 = new  PIXI.filters.InvertFilter()
     var blurFilter1 = new PIXI.filters.BloomFilter();
+    var blurFilter2 = new PIXI.filters.BlurFilter();
+    colorFilter = new PIXI.filters.ColorMatrixFilter();
+    colorWaveFilter = new PIXI.filters.ColorMatrixFilter();
+
+
+
+
     // var blurFilter1 = new PIXI.filters.GrayFilter();
     // var blurFilter1 = new PIXI.filters.PixelateFilter();
     // var blurFilter1 = new PIXI.filters.TwistFilter();
@@ -376,7 +832,17 @@ function init(){
     // var blurFilter1 = new PIXI.filters.CrossHatchFilter();  // *
     // var blurFilter1 = new PIXI.filters.TiltShiftFilter();
     // var blurFilter1 = new PIXI.filters.BlurDirFilter(0.5, 0.5);
-    container.filters = [blurFilter1];
+    blurFilter2.blur =100;
+    blurFilter2.passes = 10;
+    blurFilter2.dirty = true;
+    container.filters = [blurFilter1, colorFilter];
+    overLayGlow.filters = [blurFilter2];
+    // rfContainer.filters = [colorWaveFilter];
+    
+    // alert(blurFilter2.blurX)
+
+
+    // red1 = new utils.TextureCache("numbersRed");
 
 
 
@@ -385,7 +851,6 @@ function init(){
     stats.domElement.style.left = '0px';
     stats.domElement.style.top = '0px';
     document.body.appendChild( stats.domElement );
-
 
 
     requestAnimationFrame(animate);
@@ -427,15 +892,14 @@ function displayScore(){
 
 
 function animate() {
-
-    magVal = params.B;
-    densVal = params.Dens;
-    powVal = params.Pow;
+    magVal = ext.mag.value;
+    densVal = ext.dens.value;
+    powVal = ext.aux.value;
     displayScore();
     var lastTime = Date.now();
 
-    document.getElementById("temperature").value = ("TEMPERATURE: " + finalTemp);
-    document.getElementById("console").value = ('Mag: ' + magVal + '\n' + 'Dens: ' + densVal + '\n' + 'Pow: ' + powVal + '\n\n' + 'Temp: ' + finalTemp  + '\n' + 'Score: ' + finalScore + '\n\n' + 'P_oh: ' + finalOut.P_oh * 1.e-6 + '\n' + 'P_alpha: ' + finalOut.P_alpha * 1.e-6 + '\n' + 'P_cond: ' + finalOut.P_cond * 1.e-6 + '\n' + 'P_rad: ' + finalOut.P_rad * 1.e-6 + '\n\n' + 'Beta thermal: ' + finalOut.beta_th + '\n' + 'Beta alpha: ' + finalOut.beta_falpha + '\n'+ 'Beta: ' + finalOut.beta + '\n' + 'Beta max: ' + finalOut.betamax + '\n\n' + 'Density: ' + finalOut.densreal*1.e-20 + '\n' + 'Dens_max: ' + finalOut.densmax*1.e-20 + '\n');
+    // document.getElementById("temperature").value = ("TEMPERATURE: " + finalTemp);
+    // document.getElementById("console").value = ('Mag: ' + magVal + '\n' + 'Dens: ' + densVal + '\n' + 'Pow: ' + powVal + '\n\n' + 'Temp: ' + finalTemp  + '\n' + 'Score: ' + finalScore + '\n\n' + 'P_oh: ' + finalOut.P_oh * 1.e-6 + '\n' + 'P_alpha: ' + finalOut.P_alpha * 1.e-6 + '\n' + 'P_cond: ' + finalOut.P_cond * 1.e-6 + '\n' + 'P_rad: ' + finalOut.P_rad * 1.e-6 + '\n\n' + 'Beta thermal: ' + finalOut.beta_th + '\n' + 'Beta alpha: ' + finalOut.beta_falpha + '\n'+ 'Beta: ' + finalOut.beta + '\n' + 'Beta max: ' + finalOut.betamax + '\n\n' + 'Density: ' + finalOut.densreal*1.e-20 + '\n' + 'Dens_max: ' + finalOut.densmax*1.e-20 + '\n' + 'scale: ' + scale + '\n');
 
     Plasma.v = 1 + 3 * Params.Pow/1000;
     // iterate through the dudes and update their position
@@ -444,15 +908,22 @@ function animate() {
         var dude = aliens[i];
         dude.rotation = dude.direction;
 
+        if (i > densVal*totalDudes/10) {
+                dude.visible = false;
+            } else {
+                dude.visible = true;
+            }
+
+
         dude.phiRun += dude.w * params.tscale * dude.speed;
         // dude.phiRun %= Math.PI * 2;
         dude.phi = dude.phiRun + dude.phiStart;
         // dude.phi %= Math.PI * 2;
 
         // var normR =
-        dude.R = Torus.R * plasmaPath(dude.phi, 0);
+        dude.R = Torus.R * plasmaPath(dude.phi, dude.phase, epsi);
         // dude.scale.set(0.65+0.35*Math.sin((dude.phiRun+dude.phiStart)*2));
-        dude.scale.set(0.8*plasmaPathScale(dude.phi, 0));
+        dude.scale.set(2e-4*scale*plasmaPathScale(dude.phi, dude.phase));
         dude.alpha = plasmaPathScale(dude.phi, Math.PI/8);
         // dude.alpha(0.5 + 0.5 * Math.pow( Math.sin( (dude.phi  - Math.PI/8) * 2), 2) );
         // dude.scale.set(0.6 + 0.4 * Math.cos( (dude.phiRun) * 2) );
@@ -483,10 +954,11 @@ function animate() {
                             // + Math.sin(lastTime/1000) * 5 * mPerp * norm);
         // dude.tint = (0.7+Math.random() * 0.001) * 0xFFFFFF;
 
-        dude.tint = (0.7+(finalTemp/1000) * 0.0001) * 0xFFFFFF;
+        // dude.tint = (0.7+(finalTemp/1000) * 0.0001) * 0xFFFFFF;
+
 
         if ((params.highlightFieldLine === true) & (dude.group === 1))
-            dude.tint = (0.3+(finalTemp/1000) * 0.0001) * 0xFFFFFF;
+            dude.scale.set(1);
         if ((params.highlightBatch === true) & (dude.label === 'batch'))
             dude.tint = 0xFFFFFF;
 
@@ -497,6 +969,45 @@ function animate() {
         // dude.alpha = (Math.random() + densVal/10) > 1 ? 1 : 0;
 
     }
+    var coilglow = (magVal-1)/13;
+    coil1g.alpha = coilglow;
+    coil2g.alpha = coilglow;
+    coil3g.alpha = coilglow;
+    coil4g.alpha = coilglow;
+    coil1.alpha = 0.5+coilglow/4;
+    coil2.alpha = 0.5+coilglow/4;
+    coil3.alpha = 0.5+coilglow/4;
+    coil4.alpha = 0.5+coilglow/4;
+    alphaGlow.alpha = coilglow/4;
+
+    colorFilter.matrix = [
+        0,0,(magVal-1)/13,0,0,
+        0,1,0,0,0,
+        0,0,1-(magVal-1)/13,0,0,
+        0,0,0,1,0
+        ];
+
+    // colorWaveFilter.matrix = [
+    //     powVal/10,0,0,0,0,
+    //     (1-powVal/10),1,(1-powVal/10),0,0,
+    //     0,0,powVal/10,0,0,
+    //     0,0,0,1,0
+    //     ];
+
+    waveMove = (count % (2*Torus.R/100)) * 10 ;
+    waves.position.x = Torus.R*(2+epsi) - waveMove;
+    waves.alpha = powVal/10;
+    rfGreen.alpha = 0.5 - powVal/20;
+    densTens.visible = (ext.dens.value >= 10.) ? densControls.alpha : 0;
+    magTens.visible = (ext.mag.value >= 10.) ? magnetControls.alpha : 0;
+    auxTens.visible = (ext.aux.value >= 10.) ? auxControls.alpha : 0;
+
+        // if (count > 10 && count < 10.2) alert(colorFilter.matrix);
+
+
+
+
+    // coil1.tint = (0.7+magVal * 0.0001) * 0xFFFFFF;
 
     // time to render the stage!
     renderer.render(stage);
@@ -505,10 +1016,121 @@ function animate() {
     requestAnimationFrame(animate);
 
     //Here's a stupid comment
+    count += 0.1;
 }
 //==============================================================================
 //                                     END
 //==============================================================================
+
+function makeAntenna1 (obj,R,l) {
+    obj.moveTo(Math.cos(-rad)*R,Math.sin(-rad)*R);
+    obj.lineTo(Math.cos(-3*rad/4)*R,Math.sin(-3*rad/4)*R);
+    obj.lineTo(Math.cos(-rad/2)*R,Math.sin(-rad/2)*R);
+    obj.lineTo(Math.cos(-rad/4)*R,Math.sin(-rad/4)*R);
+    obj.lineTo(Math.cos(0)*R,Math.sin(0)*R);
+    obj.lineTo(Math.cos(rad/4)*R,Math.sin(rad/4)*R);
+    obj.lineTo(Math.cos(rad/2)*R,Math.sin(rad/2)*R);
+    obj.lineTo(Math.cos(3*rad/4)*R,Math.sin(3*rad/4)*R);
+    obj.lineTo(Math.cos(rad)*R,Math.sin(rad)*R);
+    obj.lineTo(Math.cos(rad)*R+l,Math.sin(rad)*R);
+    obj.lineTo(Math.cos(-rad)*R+l,Math.sin(-rad)*R);
+    obj.lineTo(Math.cos(-rad)*R,Math.sin(-rad)*R);
+    // alert(R+' '+l+' '+rad);
+}
+
+function makeCoil (obj,l,w,quad) {
+    var sign1 = (quad == 3 || quad == 4) ? 1 : -1;
+    var sign2 = (quad == 1 || quad == 4) ? 1 : -1;
+    obj.drawRoundedRect(-l/2,-w/2,l,w,w/8);
+    obj.position = ({x:sign1*Torus.R/Math.sqrt(2),y:sign2*Torus.R/Math.sqrt(2)});
+    obj.rotation = sign1*sign2*(Math.PI/4);
+    obj.alpha = 0.5; 
+}
+
+function picknumtexture(num,color,dot) {
+
+        frameRectangle.clear();
+        frameRectangle.drawRect(num*320,dot ? 0 : 500,320,500);
+        // frameRectangle = new PIXI.Rectangle(num*280,dot ? 0 : 500,280,450);
+        // rectangles.push(rectangle);
+        if (color == 'red') var texture = loader.resources.numbersRed.texture;
+        texture.frame = frameRectangle;
+        return texture
+}
+
+function formatNumber(obj, cornerX, cornerY, scalefactor) {
+        obj.x = cornerX;
+        obj.y = cornerY;
+        obj.scale={'x':scale*scalefactor*1.e-4,'y':scale*scalefactor*1.e-4};
+}
+
+function updateDigital(obj,digi,dec) {
+    // console.log(dig[0]);
+    var numlength = digi.length;
+    for (var j = 0; j < numlength; j++) {
+        // console.log(obj.value);
+        var thisdig = Math.floor(obj.value / Math.pow(10,(numlength - dec - 1 - j)) % 10);
+        if (j == numlength -dec - 1) {
+            var txt = 'red' + thisdig +'d.png';
+        } else {
+            var txt = 'red' + thisdig +'.png';
+        };
+        // console.log(txt);
+        digi[j].texture = PIXI.loader.resources["numbersred"].textures[txt];
+        digi[j].num = thisdig;
+    };
+}
+
+    function buttonize(obj) {
+    obj.interactive = true;
+    obj.buttonMode = true;
+    obj
+        .on('mouseover', buttonOver)
+        .on('mouseup',arrowReleased)
+        .on('mousedown',arrowPressed)
+        .on('touchstart',arrowPressed)
+        .on('touchend',arrowReleased)
+        .on('mouseout',arrowReleased)
+        .on('touchendoutside',arrowReleased)
+        .on('click',arrowClicked)
+        .on('tap',arrowClicked);        
+    }
+
+    function buttonOver() {
+        this.defaultCursor = 'pointer';
+    }
+
+
+    function arrowClicked() {
+        var thisobj = this;
+        var txtpressed = (this.para2.dir == 'up') ? "upredpressed.png" : "downredpressed.png";
+        var txt = (this.para2.dir == 'up') ? "upred.png" : "downred.png";
+        this.texture = PIXI.loader.resources.numbersred.textures[txtpressed];
+        setTimeout(function(){
+            thisobj.texture = PIXI.loader.resources.numbersred.textures[txt];
+        },100);
+    }
+
+    function arrowPressed() {
+        var txtpressed = (this.para2.dir == 'up') ? "upredpressed.png" : "downredpressed.png";
+        this.texture = PIXI.loader.resources.numbersred.textures[txtpressed];
+        this.defaultCursor = 'crosshair';
+        var sign = (this.para2.dir == 'up') ? 1 : -1;
+
+        this.para1.obj.value += sign*Math.pow(10,this.para2.exp);
+        this.para1.obj.value = (this.para1.obj.value > this.para1.obj.max) ? this.para1.obj.max : (this.para1.obj.value < this.para1.obj.min) ? this.para1.obj.min : this.para1.obj.value;
+
+        updateDigital(this.para1.obj,this.para1.arr,this.para1.dec);
+        // console.log(this.para1.obj.value);   
+
+    }
+
+    function arrowReleased() {
+        var txt = (this.para2.dir == 'up') ? "upred.png" : "downred.png";
+        this.texture = PIXI.loader.resources.numbersred.textures[txt];
+        this.defaultCursor = 'pointer';
+    }
+
 
 </script>
 

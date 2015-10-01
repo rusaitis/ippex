@@ -1,0 +1,73 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>IPPEX</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #444444;
+        }
+
+        .rendererView {
+            position: absolute;
+            display: block;
+            height: 100%;
+        }
+        .console {
+          display: block;
+          margin: 0;
+          width: 100%;
+          font-family: Helvetica Neue, sans-serif;
+          font-size: 35px;
+          font-weight: lighter;
+          appearance: none;
+          box-shadow: none;
+          border-radius: none;
+          background: transparent;
+          border: none;
+          color: #ffffff;
+        }
+        .console:focus {
+          outline: none;
+        }
+        .title{
+            color: white;
+            font-weight: lighter;
+            font-size: 32px;
+            font-family: Helvetica Neue, sans-serif;
+        }
+        #console {
+          font-size: 16px;
+          height: 350px;
+          width: 300px;
+          color: #d4ffe2;
+        }
+        #container {
+          background-color: #444444;
+        }
+        .temperature {
+            color: #89ff8f;
+        }
+    </style>
+</head>
+
+<body>
+<div id="title" class="title" style="position: absolute; top: 10px; left: 100px;'">
+    <!-- <i class="fa fa-globe fa-inverse fa-3x"></i> -->
+    <input type="text" id="status" class="console"></input>
+    <textarea type="text" id="console" class="console"></textarea>
+</div>
+<div id="score" class="title" style="position: absolute; top: 200px; left: 100px;'">
+Test PIXI <a href="./tokamak/pixitest.html"><font color="#ff6fcf">here.</font></a>
+</div>
+<div id="temperatureDiv" class="title" style="position: absolute; top: 600px; left: 100px; color: #89ff8f;'">
+<!-- TEMPERATURE: 0 -->
+<input type="text" id="temperature" class="console temperature"></input>
+</div>
+
+
+</body>
+
+</html>

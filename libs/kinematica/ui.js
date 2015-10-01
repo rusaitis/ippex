@@ -24,10 +24,40 @@ function rgbToHex(r, g, b) {
     return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
+function hexToRgb(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
+}
+
 var colors = ['#DC3522', '#374140', '#D9CB9E', '#00A388', '#BEEB9F', '#FF6138', '#787746', '#703030', '#2F343B', '#C77966', '#7E827A', '#01B0F0', '#FF358B', '#AEEE00', '#F5A503', '#36B1BF', '#FFEEAD', '#8F8164', '#593325'];
 
 function getRandomColor() {
     return colors[Math.round(Math.random() * (colors.length-1))];
+}
+
+function blueToRed(value) {
+    var r = 255*value;
+    var b = 255 - r;
+    var g = 0;
+    return {'hex':"#" + rgbToHex(r,g,b), 'rgb':[r,g,b]};
+}
+
+function greenToBlueToRed(value) {
+    var r = 0;
+    var b = 0;
+    var g = 0;
+    if (value < 0.5) {
+        g = value * 255;
+        b = 255 - b;
+    } else {
+        r = value * 255;
+        g = 255 - b;
+    }
+    return {'hex':"#" + rgbToHex(r,g,b), 'rgb':[r,g,b]};
 }
 
 
