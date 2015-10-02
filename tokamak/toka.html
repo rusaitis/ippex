@@ -22,14 +22,14 @@
     <input type="text" id="status" class="console"></input>
     <textarea type="text" id="console" class="console"></textarea>
 </div> -->
-<div id="score" class="title" style="position: absolute; top: 550px; left: 100px;'">
+<!-- <div id="score" class="title" style="position: absolute; top: 550px; left: 100px;'">
 SCORE: 0
-</div>
-<div id="temperatureDiv" class="title" style="position: absolute; top: 600px; left: 100px; color: #89ff8f;'">
-<!-- TEMPERATURE: 0 -->
+</div> -->
+<!-- <div id="temperatureDiv" class="title" style="position: absolute; top: 600px; left: 100px; color: #89ff8f;'">
+TEMPERATURE: 0
 <input type="text" id="temperature" class="console temperature"></input>
-</div>
-<div id="container"></div>
+</div> -->
+<!-- <div id="container"></div> -->
 <!-- <script src="../libs/util/dat.gui.min.js"></script> -->
 <script src="../libs/util/TweenMax.min.js"></script>
 <!-- <script src="../libs/jquery/jquery.min.js"></script> -->
@@ -37,6 +37,7 @@ SCORE: 0
 <!-- // <script src="../libs/jquery-mobile/jquery.mobile-1.4.5.min.js"></script> -->
 <script src="../libs/kinematica/ui.js"></script>
 <script src="toka_physics.js"></script>
+<script src="functions.js"></script>
 <script src="Ziggurat.js"></script>
 <script defer="defer">
 
@@ -48,7 +49,7 @@ var Params = function() {
   this.tscale = 4;
   // this.T = 10000;
   this.B = 1;
-  this.Dens = 2.5;
+  this.Dens = 10;
   this.Pow = 0.19;
   this.highlightFieldLine = false;
   this.highlightBatch = false;
@@ -64,6 +65,7 @@ var numwidth = 320 * scale * numscale * 1.e-4;
 var numheight = 500 * scale * numscale * 1.e-4;
 var arrowwidth = 320 * scale * numscale * 1.e-4;
 var arrowheight = 150 * scale * numscale * 1.e-4;
+var introPlayed = false;
 
 // alert(scale);
 var Torus = {R:scale * scaleTorus, r:scale * scaleTorus * epsi};
@@ -176,6 +178,10 @@ var overLay = new PIXI.Container();
 overLay.position.x = renderer.width / 2;
 overLay.position.y = renderer.height / 2;
 
+var controls = new PIXI.Container();
+controls.position.x = 0;
+controls.position.y = 0;
+
 var auxControls = new PIXI.Container();
 auxControls.position.x = renderer.width * 3/4;
 auxControls.position.y = renderer.height * 3/4;
@@ -188,7 +194,13 @@ var densControls = new PIXI.Container();
 densControls.position.x = renderer.width * 1/8;
 densControls.position.y = renderer.height * 3/4;
 
+var townContainer = new PIXI.Container();
+townContainer.position.x = renderer.width /2;
+townContainer.position.y = renderer.height /2;
 
+var nstxContainer = new PIXI.Container();
+nstxContainer.position.x = renderer.width /2;
+nstxContainer.position.y = renderer.height /2;
 
 stage.addChild(background);
 stage.addChild(underLay);
@@ -196,9 +208,13 @@ stage.addChild(container);
 stage.addChild(rfContainer);
 stage.addChild(overLayGlow);
 stage.addChild(overLay);
-stage.addChild(auxControls);
-stage.addChild(magnetControls);
-stage.addChild(densControls);
+stage.addChild(controls);
+controls.addChild(auxControls);
+controls.addChild(magnetControls);
+controls.addChild(densControls);
+stage.addChild(townContainer);
+stage.addChild(nstxContainer);
+
 
 var frameRectangle = new PIXI.Graphics();
 
@@ -263,8 +279,14 @@ var loader = PIXI.loader; // pixi exposes a premade instance for you to use.
 // var loader = new PIXI.loaders.Loader(); // you can also create your own if you want
 loader.add('spark',"img/spark5.png");
 loader.add('reactor',"img/reactorBG5.png");
-loader.add('coil',"img/coil5.png");
+loader.add('coil',"img/coil.png");
+loader.add('coilglow',"img/glowcoil.png");
 loader.add('rf',"img/rfwave2.png");
+loader.add('alpha',"img/alphaglow.png");
+loader.add('backbut',"img/backbutton.png");
+loader.add('town',"img/town.png");
+loader.add('nstx',"img/nstx.jpg");
+loader.add('exit',"img/exit.gif");
 loader.add('numbersred',"img/numbersred2.json");
 loader.once('complete',init);
 loader.load();
@@ -414,25 +436,25 @@ function init(){
     densUpOnes = new PIXI.Sprite(PIXI.loader.resources.numbersred.textures["upred.png"]);
     densUpOnes.para1 = para1;
     densUpOnes.para2 = {'dir' : 'up' , 'exp' : 0};
-    buttonize(densUpOnes);
+    buttonize(densUpOnes,buttonOver,arrowPressed,arrowReleased,arrowClicked);
     formatNumber(densUpOnes,0,0,numscale);
 
     densDownOnes = new PIXI.Sprite(PIXI.loader.resources.numbersred.textures["downred.png"]);
     densDownOnes.para1 = para1;
     densDownOnes.para2 = {'dir' : 'down' , 'exp' : 0};
-    buttonize(densDownOnes);
+    buttonize(densDownOnes,buttonOver,arrowPressed,arrowReleased,arrowClicked);
     formatNumber(densDownOnes,0,numheight+arrowheight,numscale);
 
     densUpTenth = new PIXI.Sprite(PIXI.loader.resources.numbersred.textures["upred.png"]);
     densUpTenth.para1 = para1;
     densUpTenth.para2 = {'dir' : 'up' , 'exp' : -1};
-    buttonize(densUpTenth);
+    buttonize(densUpTenth,buttonOver,arrowPressed,arrowReleased,arrowClicked);
     formatNumber(densUpTenth,numwidth,0,numscale);
 
     densDownTenth = new PIXI.Sprite(PIXI.loader.resources.numbersred.textures["downred.png"]);
     densDownTenth.para1 = para1;
     densDownTenth.para2 = {'dir' : 'down' , 'exp' : -1};
-    buttonize(densDownTenth);
+    buttonize(densDownTenth,buttonOver,arrowPressed,arrowReleased,arrowClicked);
     formatNumber(densDownTenth,numwidth,numheight+arrowheight,numscale);
 
     densControls.addChild(densContBox);
@@ -498,25 +520,25 @@ function init(){
     magUpOnes = new PIXI.Sprite(PIXI.loader.resources.numbersred.textures["upred.png"]);
     magUpOnes.para1 = para1;
     magUpOnes.para2 = {'dir' : 'up' , 'exp' : 0};
-    buttonize(magUpOnes);
+    buttonize(magUpOnes,buttonOver,arrowPressed,arrowReleased,arrowClicked);
     formatNumber(magUpOnes,0,0,numscale);
 
     magDownOnes = new PIXI.Sprite(PIXI.loader.resources.numbersred.textures["downred.png"]);
     magDownOnes.para1 = para1;
     magDownOnes.para2 = {'dir' : 'down' , 'exp' : 0};
-    buttonize(magDownOnes);
+    buttonize(magDownOnes,buttonOver,arrowPressed,arrowReleased,arrowClicked);
     formatNumber(magDownOnes,0,numheight+arrowheight,numscale);
 
     magUpTenth = new PIXI.Sprite(PIXI.loader.resources.numbersred.textures["upred.png"]);
     magUpTenth.para1 = para1;
     magUpTenth.para2 = {'dir' : 'up' , 'exp' : -1};
-    buttonize(magUpTenth);
+    buttonize(magUpTenth,buttonOver,arrowPressed,arrowReleased,arrowClicked);
     formatNumber(magUpTenth,numwidth,0,numscale);
 
     magDownTenth = new PIXI.Sprite(PIXI.loader.resources.numbersred.textures["downred.png"]);
     magDownTenth.para1 = para1;
     magDownTenth.para2 = {'dir' : 'down' , 'exp' : -1};
-    buttonize(magDownTenth);
+    buttonize(magDownTenth,buttonOver,arrowPressed,arrowReleased,arrowClicked);
     formatNumber(magDownTenth,numwidth,numheight+arrowheight,numscale);
 
 
@@ -585,25 +607,25 @@ function init(){
     auxUpOnes = new PIXI.Sprite(PIXI.loader.resources.numbersred.textures["upred.png"]);
     auxUpOnes.para1 = para1;
     auxUpOnes.para2 = {'dir' : 'up' , 'exp' : 0};
-    buttonize(auxUpOnes);
+    buttonize(auxUpOnes,buttonOver,arrowPressed,arrowReleased,arrowClicked);
     formatNumber(auxUpOnes,0,0,numscale);
 
     auxDownOnes = new PIXI.Sprite(PIXI.loader.resources.numbersred.textures["downred.png"]);
     auxDownOnes.para1 = para1;
     auxDownOnes.para2 = {'dir' : 'down' , 'exp' : 0};
-    buttonize(auxDownOnes);
+    buttonize(auxDownOnes,buttonOver,arrowPressed,arrowReleased,arrowClicked);
     formatNumber(auxDownOnes,0,numheight+arrowheight,numscale);
 
     auxUpTenth = new PIXI.Sprite(PIXI.loader.resources.numbersred.textures["upred.png"]);
     auxUpTenth.para1 = para1;
     auxUpTenth.para2 = {'dir' : 'up' , 'exp' : -1};
-    buttonize(auxUpTenth);
+    buttonize(auxUpTenth,buttonOver,arrowPressed,arrowReleased,arrowClicked);
     formatNumber(auxUpTenth,numwidth,0,numscale);
 
     auxDownTenth = new PIXI.Sprite(PIXI.loader.resources.numbersred.textures["downred.png"]);
     auxDownTenth.para1 = para1;
     auxDownTenth.para2 = {'dir' : 'down' , 'exp' : -1};
-    buttonize(auxDownTenth);
+    buttonize(auxDownTenth,buttonOver,arrowPressed,arrowReleased,arrowClicked);
     formatNumber(auxDownTenth,numwidth,numheight+arrowheight,numscale);
 
     auxControls.addChild(auxContBox);
@@ -747,58 +769,174 @@ function init(){
     // bg.zIndex = 2;
 
 
-    coil1g = new PIXI.Graphics();
-    coil1g.beginFill(0x7e7e7e);
-    makeCoil(coil1g,4.3*Torus.r,Torus.r*1.3,1);
-    coil1g.endFill();
+
+
+    // coil1g = new PIXI.Graphics();
+    // coil1g.beginFill(0x7e7e7e);
+    // makeCoil(coil1g,4.3*Torus.r,Torus.r*1.3,1);
+    // coil1g.endFill();
+    // overLayGlow.addChild(coil1g);
+
+    // coil2g = new PIXI.Graphics();
+    // coil2g.beginFill(0x7e7e7e);
+    // makeCoil(coil2g,4.3*Torus.r,Torus.r*1.3,2);
+    // coil2g.endFill();
+    // overLayGlow.addChild(coil2g);
+
+    // coil3g = new PIXI.Graphics();
+    // coil3g.beginFill(0x7e7e7e);
+    // makeCoil(coil3g,4.3*Torus.r,Torus.r*1.3,3);
+    // coil3g.endFill();
+    // overLayGlow.addChild(coil3g);
+
+    // coil4g = new PIXI.Graphics();
+    // coil4g.beginFill(0x7e7e7e);
+    // makeCoil(coil4g,4.3*Torus.r,Torus.r*1.3,4);
+    // coil4g.endFill();
+    // overLayGlow.addChild(coil4g);
+    townSprite  = new PIXI.Sprite(loader.resources.town.texture);
+    townSprite.anchor.set(0.5);
+    townSprite.position.x = 0;
+    townSprite.position.y = 0;
+    townSprite.width = width;
+    townSprite.height = height;
+
+    backButton = new PIXI.Sprite(loader.resources.backbut.texture);
+    backButton.anchor.set(0.5);
+    backButton.position.x = scale/4;
+    backButton.position.y = scale/4;
+    backButton.scale.set(1,1);
+    buttonize(backButton,buttonOver,backPressed);
+
+
+    townContainer.addChild(townSprite);
+    townContainer.addChild(backButton);
+    townContainer.visible = false;
+
+    exitButton = new PIXI.Sprite(loader.resources.exit.texture);
+    exitButton.anchor.set(0.5);
+    exitButton.position.x = width * 7/8;
+    exitButton.position.y = height * 7/8;
+    exitButton.scale.set(1,1);  
+    buttonize(exitButton,buttonOver,exitPressed);
+
+    controls.addChild(exitButton);
+
+    nstxSprite  = new PIXI.Sprite(loader.resources.nstx.texture);
+    nstxSprite.anchor.set(0.5);
+    nstxSprite.position.x = 0;
+    nstxSprite.position.y = 0;
+    nstxSprite.width = width;
+    nstxSprite.height = height;
+
+    nstxContainer.addChild(nstxSprite);
+    nstxContainer.visible = true;
+
+
+
+
+
+
+
+
+
+    coil1g = new PIXI.Sprite(loader.resources.coilglow.texture);
+    coil1g.scale.set(5*Torus.r/600,5*Torus.r/400);
+    coil1g.position = ({x:-3.4*Torus.r*Math.cos(Math.PI/4), y:-3.4*Torus.r*Math.cos(Math.PI/4)});
+    coil1g.anchor.set(0.5);
+    coil1g.rotation = (Math.PI/4);
+    coil1g.alpha = 0.5
     overLayGlow.addChild(coil1g);
 
-    coil2g = new PIXI.Graphics();
-    coil2g.beginFill(0x7e7e7e);
-    makeCoil(coil2g,4.3*Torus.r,Torus.r*1.3,2);
-    coil2g.endFill();
+
+    coil2g = new PIXI.Sprite(loader.resources.coilglow.texture);
+    coil2g.scale.set(5*Torus.r/600,5*Torus.r/400);
+    coil2g.position = ({x:3.4*Torus.r*Math.cos(Math.PI/4), y:-3.4*Torus.r*Math.cos(Math.PI/4)});
+    coil2g.anchor.set(0.5);
+    coil2g.rotation = (-Math.PI/4);
+    coil2g.alpha = 0.5
     overLayGlow.addChild(coil2g);
 
-    coil3g = new PIXI.Graphics();
-    coil3g.beginFill(0x7e7e7e);
-    makeCoil(coil3g,4.3*Torus.r,Torus.r*1.3,3);
-    coil3g.endFill();
+
+    coil3g = new PIXI.Sprite(loader.resources.coilglow.texture);
+    coil3g.scale.set(5*Torus.r/600,5*Torus.r/400);
+    coil3g.position = ({x:3.4*Torus.r*Math.cos(Math.PI/4), y:3.4*Torus.r*Math.cos(Math.PI/4)});
+    coil3g.anchor.set(0.5);
+    coil3g.rotation = (Math.PI/4);
+    coil3g.alpha = 0.5
     overLayGlow.addChild(coil3g);
 
-    coil4g = new PIXI.Graphics();
-    coil4g.beginFill(0x7e7e7e);
-    makeCoil(coil4g,4.3*Torus.r,Torus.r*1.3,4);
-    coil4g.endFill();
+    coil4g = new PIXI.Sprite(loader.resources.coilglow.texture);
+    coil4g.scale.set(5*Torus.r/600,5*Torus.r/400);
+    coil4g.position = ({x:-3.4*Torus.r*Math.cos(Math.PI/4), y:3.4*Torus.r*Math.cos(Math.PI/4)});
+    coil4g.anchor.set(0.5);
+    coil4g.rotation = (-Math.PI/4);
+    coil4g.alpha = 0.5
     overLayGlow.addChild(coil4g);
 
 
-    coil1 = new PIXI.Graphics();
-    coil1.beginFill(0x7e7e7e);
-    makeCoil(coil1,3.8*Torus.r,Torus.r,1);
-    coil1.endFill();
+    coil1 = new PIXI.Sprite(loader.resources.coil.texture);
+    coil1.scale.set(5*Torus.r/600,5*Torus.r/600);
+    coil1.position = ({x:-3.4*Torus.r*Math.cos(Math.PI/4), y:-3.4*Torus.r*Math.cos(Math.PI/4)});
+    coil1.anchor.set(0.5);
+    coil1.rotation = (Math.PI/4);
+    coil1.alpha = 0.5
     overLay.addChild(coil1);
 
-    coil2 = new PIXI.Graphics();
-    coil2.beginFill(0x7e7e7e);
-    makeCoil(coil2,3.8*Torus.r,Torus.r,2);
-    coil2.endFill();
+
+    coil2 = new PIXI.Sprite(loader.resources.coil.texture);
+    coil2.scale.set(5*Torus.r/600,5*Torus.r/600);
+    coil2.position = ({x:3.4*Torus.r*Math.cos(Math.PI/4), y:-3.4*Torus.r*Math.cos(Math.PI/4)});
+    coil2.anchor.set(0.5);
+    coil2.rotation = (-Math.PI/4);
+    coil2.alpha = 0.5
     overLay.addChild(coil2);
 
-    coil3 = new PIXI.Graphics();
-    coil3.beginFill(0x7e7e7e);
-    makeCoil(coil3,3.8*Torus.r,Torus.r,3);
-    coil3.endFill();
+
+    coil3 = new PIXI.Sprite(loader.resources.coil.texture);
+    coil3.scale.set(5*Torus.r/600,5*Torus.r/600);
+    coil3.position = ({x:3.4*Torus.r*Math.cos(Math.PI/4), y:3.4*Torus.r*Math.cos(Math.PI/4)});
+    coil3.anchor.set(0.5);
+    coil3.rotation = (Math.PI/4);
+    coil3.alpha = 0.5
     overLay.addChild(coil3);
 
-    coil4 = new PIXI.Graphics();
-    coil4.beginFill(0x7e7e7e);
-    makeCoil(coil4,3.8*Torus.r,Torus.r,4);
-    coil4.endFill();
+    coil4 = new PIXI.Sprite(loader.resources.coil.texture);
+    coil4.scale.set(5*Torus.r/600,5*Torus.r/600);
+    coil4.position = ({x:-3.4*Torus.r*Math.cos(Math.PI/4), y:3.4*Torus.r*Math.cos(Math.PI/4)});
+    coil4.anchor.set(0.5);
+    coil4.rotation = (-Math.PI/4);
+    coil4.alpha = 0.5
     overLay.addChild(coil4);
 
-    alphaGlow = new PIXI.Graphics();
-    alphaGlow.lineStyle(50,0xff0000);
-    alphaGlow.drawCircle(0,0,(Torus.R));
+
+    // coil1 = new PIXI.Graphics();
+    // coil1.beginFill(0x7e7e7e);
+    // makeCoil(coil1,3.8*Torus.r,Torus.r,1);
+    // coil1.endFill();
+    // overLay.addChild(coil1);
+
+    // coil2 = new PIXI.Graphics();
+    // coil2.beginFill(0x7e7e7e);
+    // makeCoil(coil2,3.8*Torus.r,Torus.r,2);
+    // coil2.endFill();
+    // overLay.addChild(coil2);
+
+    // coil3 = new PIXI.Graphics();
+    // coil3.beginFill(0x7e7e7e);
+    // makeCoil(coil3,3.8*Torus.r,Torus.r,3);
+    // coil3.endFill();
+    // overLay.addChild(coil3);
+
+    // coil4 = new PIXI.Graphics();
+    // coil4.beginFill(0x7e7e7e);
+    // makeCoil(coil4,3.8*Torus.r,Torus.r,4);
+    // coil4.endFill();
+    // overLay.addChild(coil4);
+
+    alphaGlow = new PIXI.Sprite(loader.resources.alpha.texture);
+    alphaGlow.scale.set(2*Torus.R/500*1.4);
+    alphaGlow.anchor.set(0.5);
     overLayGlow.addChild(alphaGlow);
 
 
@@ -832,12 +970,12 @@ function init(){
     // var blurFilter1 = new PIXI.filters.CrossHatchFilter();  // *
     // var blurFilter1 = new PIXI.filters.TiltShiftFilter();
     // var blurFilter1 = new PIXI.filters.BlurDirFilter(0.5, 0.5);
-    blurFilter2.blur =100;
-    blurFilter2.passes = 10;
-    blurFilter2.dirty = true;
-    container.filters = [blurFilter1, colorFilter];
+    blurFilter2.blur =1;
+    blurFilter2.passes = 1;
+    // blurFilter2.dirty = true;
+    container.filters = [colorFilter];
     overLayGlow.filters = [blurFilter2];
-    // rfContainer.filters = [colorWaveFilter];
+    rfContainer.filters = [colorWaveFilter];
     
     // alert(blurFilter2.blurX)
 
@@ -916,6 +1054,7 @@ function animate() {
 
 
         dude.phiRun += dude.w * params.tscale * dude.speed;
+        // dude.filters = [colorFilter];
         // dude.phiRun %= Math.PI * 2;
         dude.phi = dude.phiRun + dude.phiStart;
         // dude.phi %= Math.PI * 2;
@@ -969,7 +1108,7 @@ function animate() {
         // dude.alpha = (Math.random() + densVal/10) > 1 ? 1 : 0;
 
     }
-    var coilglow = (magVal-1)/13;
+    var coilglow = ((magVal-1)/13*(0.1*Math.cos(count)+1) > 1) ? 1 : ((magVal-1)/13*(0.1*Math.cos(count)+1) < 0) ? 0 : (magVal-1)/13*(0.1*Math.cos(count)+1)
     coil1g.alpha = coilglow;
     coil2g.alpha = coilglow;
     coil3g.alpha = coilglow;
@@ -994,13 +1133,20 @@ function animate() {
     //     0,0,0,1,0
     //     ];
 
-    waveMove = (count % (2*Torus.R/100)) * 10 ;
+    waveMove = (count % (2*Torus.R/100)) * 30 ;
     waves.position.x = Torus.R*(2+epsi) - waveMove;
     waves.alpha = powVal/10;
     rfGreen.alpha = 0.5 - powVal/20;
     densTens.visible = (ext.dens.value >= 10.) ? densControls.alpha : 0;
     magTens.visible = (ext.mag.value >= 10.) ? magnetControls.alpha : 0;
     auxTens.visible = (ext.aux.value >= 10.) ? auxControls.alpha : 0;
+
+    if (count < 10 && !(introPlayed)) {
+        nstxContainer.alpha = 1 - count/10
+    } else {
+        nstxContainer.visible = false;
+        introPlayed = true;
+    }
 
         // if (count > 10 && count < 10.2) alert(colorFilter.matrix);
 
@@ -1016,120 +1162,13 @@ function animate() {
     requestAnimationFrame(animate);
 
     //Here's a stupid comment
-    count += 0.1;
+    if (count > 1000) count = 0; else count +=0.1;
 }
 //==============================================================================
 //                                     END
 //==============================================================================
 
-function makeAntenna1 (obj,R,l) {
-    obj.moveTo(Math.cos(-rad)*R,Math.sin(-rad)*R);
-    obj.lineTo(Math.cos(-3*rad/4)*R,Math.sin(-3*rad/4)*R);
-    obj.lineTo(Math.cos(-rad/2)*R,Math.sin(-rad/2)*R);
-    obj.lineTo(Math.cos(-rad/4)*R,Math.sin(-rad/4)*R);
-    obj.lineTo(Math.cos(0)*R,Math.sin(0)*R);
-    obj.lineTo(Math.cos(rad/4)*R,Math.sin(rad/4)*R);
-    obj.lineTo(Math.cos(rad/2)*R,Math.sin(rad/2)*R);
-    obj.lineTo(Math.cos(3*rad/4)*R,Math.sin(3*rad/4)*R);
-    obj.lineTo(Math.cos(rad)*R,Math.sin(rad)*R);
-    obj.lineTo(Math.cos(rad)*R+l,Math.sin(rad)*R);
-    obj.lineTo(Math.cos(-rad)*R+l,Math.sin(-rad)*R);
-    obj.lineTo(Math.cos(-rad)*R,Math.sin(-rad)*R);
-    // alert(R+' '+l+' '+rad);
-}
 
-function makeCoil (obj,l,w,quad) {
-    var sign1 = (quad == 3 || quad == 4) ? 1 : -1;
-    var sign2 = (quad == 1 || quad == 4) ? 1 : -1;
-    obj.drawRoundedRect(-l/2,-w/2,l,w,w/8);
-    obj.position = ({x:sign1*Torus.R/Math.sqrt(2),y:sign2*Torus.R/Math.sqrt(2)});
-    obj.rotation = sign1*sign2*(Math.PI/4);
-    obj.alpha = 0.5; 
-}
-
-function picknumtexture(num,color,dot) {
-
-        frameRectangle.clear();
-        frameRectangle.drawRect(num*320,dot ? 0 : 500,320,500);
-        // frameRectangle = new PIXI.Rectangle(num*280,dot ? 0 : 500,280,450);
-        // rectangles.push(rectangle);
-        if (color == 'red') var texture = loader.resources.numbersRed.texture;
-        texture.frame = frameRectangle;
-        return texture
-}
-
-function formatNumber(obj, cornerX, cornerY, scalefactor) {
-        obj.x = cornerX;
-        obj.y = cornerY;
-        obj.scale={'x':scale*scalefactor*1.e-4,'y':scale*scalefactor*1.e-4};
-}
-
-function updateDigital(obj,digi,dec) {
-    // console.log(dig[0]);
-    var numlength = digi.length;
-    for (var j = 0; j < numlength; j++) {
-        // console.log(obj.value);
-        var thisdig = Math.floor(obj.value / Math.pow(10,(numlength - dec - 1 - j)) % 10);
-        if (j == numlength -dec - 1) {
-            var txt = 'red' + thisdig +'d.png';
-        } else {
-            var txt = 'red' + thisdig +'.png';
-        };
-        // console.log(txt);
-        digi[j].texture = PIXI.loader.resources["numbersred"].textures[txt];
-        digi[j].num = thisdig;
-    };
-}
-
-    function buttonize(obj) {
-    obj.interactive = true;
-    obj.buttonMode = true;
-    obj
-        .on('mouseover', buttonOver)
-        .on('mouseup',arrowReleased)
-        .on('mousedown',arrowPressed)
-        .on('touchstart',arrowPressed)
-        .on('touchend',arrowReleased)
-        .on('mouseout',arrowReleased)
-        .on('touchendoutside',arrowReleased)
-        .on('click',arrowClicked)
-        .on('tap',arrowClicked);        
-    }
-
-    function buttonOver() {
-        this.defaultCursor = 'pointer';
-    }
-
-
-    function arrowClicked() {
-        var thisobj = this;
-        var txtpressed = (this.para2.dir == 'up') ? "upredpressed.png" : "downredpressed.png";
-        var txt = (this.para2.dir == 'up') ? "upred.png" : "downred.png";
-        this.texture = PIXI.loader.resources.numbersred.textures[txtpressed];
-        setTimeout(function(){
-            thisobj.texture = PIXI.loader.resources.numbersred.textures[txt];
-        },100);
-    }
-
-    function arrowPressed() {
-        var txtpressed = (this.para2.dir == 'up') ? "upredpressed.png" : "downredpressed.png";
-        this.texture = PIXI.loader.resources.numbersred.textures[txtpressed];
-        this.defaultCursor = 'crosshair';
-        var sign = (this.para2.dir == 'up') ? 1 : -1;
-
-        this.para1.obj.value += sign*Math.pow(10,this.para2.exp);
-        this.para1.obj.value = (this.para1.obj.value > this.para1.obj.max) ? this.para1.obj.max : (this.para1.obj.value < this.para1.obj.min) ? this.para1.obj.min : this.para1.obj.value;
-
-        updateDigital(this.para1.obj,this.para1.arr,this.para1.dec);
-        // console.log(this.para1.obj.value);   
-
-    }
-
-    function arrowReleased() {
-        var txt = (this.para2.dir == 'up') ? "upred.png" : "downred.png";
-        this.texture = PIXI.loader.resources.numbersred.textures[txt];
-        this.defaultCursor = 'pointer';
-    }
 
 
 </script>
