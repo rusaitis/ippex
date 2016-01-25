@@ -1,0 +1,458 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>PIXI Draggable / Droppable</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, minimal-ui" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-title" content="PIXI DOM">
+
+    <style>
+    @-ms-viewport { width: 100vw ; zoom: 100% ; }                           @viewport { width: 100vw ; zoom: 100% ; }
+    @-ms-viewport { user-zoom: fixed ; }                                    @viewport { user-zoom: fixed ; }
+    * { margin:0; padding:0; }
+    html,body { overflow:hidden; }
+    body { background: #000; text-align:center; }
+    canvas {
+        image-rendering: optimizeSpeed;
+        image-rendering: -moz-crisp-edges;
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: optimize-contrast;
+        -ms-interpolation-mode: nearest-neighbor;
+        margin:0 auto;
+    }
+    </style>
+</head>
+<body unselectable="on" style="-moz-user-select: none; -webkit-user-select: none; user-select: none">
+
+
+    <script src="pixi.js"></script>
+    <script src="../bin/pixi.draggable.js"></script>
+    <script src="pixi.ninepatch.js"></script>
+    <script src="pixi.input.js"></script>
+    <script src="prism.js"></script>
+
+    <script>
+
+ // stats.js - http://github.com/mrdoob/stats.js
+var Stats=function(){var l=Date.now(),m=l,g=0,n=Infinity,o=0,h=0,p=Infinity,q=0,r=0,s=0,f=document.createElement("div");f.id="stats";f.addEventListener("mousedown",function(b){b.preventDefault();t(++s%2)},!1);f.style.cssText="width:80px;opacity:0.9;cursor:pointer";var a=document.createElement("div");a.id="fps";a.style.cssText="padding:0 0 3px 3px;text-align:left;background-color:#002";f.appendChild(a);var i=document.createElement("div");i.id="fpsText";i.style.cssText="color:#0ff;font-family:Helvetica,Arial,sans-serif;font-size:9px;font-weight:bold;line-height:15px";
+i.innerHTML="FPS";a.appendChild(i);var c=document.createElement("div");c.id="fpsGraph";c.style.cssText="position:relative;width:74px;height:30px;background-color:#0ff";for(a.appendChild(c);74>c.children.length;){var j=document.createElement("span");j.style.cssText="width:1px;height:30px;float:left;background-color:#113";c.appendChild(j)}var d=document.createElement("div");d.id="ms";d.style.cssText="padding:0 0 3px 3px;text-align:left;background-color:#020;display:none";f.appendChild(d);var k=document.createElement("div");
+k.id="msText";k.style.cssText="color:#0f0;font-family:Helvetica,Arial,sans-serif;font-size:9px;font-weight:bold;line-height:15px";k.innerHTML="MS";d.appendChild(k);var e=document.createElement("div");e.id="msGraph";e.style.cssText="position:relative;width:74px;height:30px;background-color:#0f0";for(d.appendChild(e);74>e.children.length;)j=document.createElement("span"),j.style.cssText="width:1px;height:30px;float:left;background-color:#131",e.appendChild(j);var t=function(b){s=b;switch(s){case 0:a.style.display=
+"block";d.style.display="none";break;case 1:a.style.display="none",d.style.display="block"}};return{REVISION:12,domElement:f,setMode:t,begin:function(){l=Date.now()},end:function(){var b=Date.now();g=b-l;n=Math.min(n,g);o=Math.max(o,g);k.textContent=g+" MS ("+n+"-"+o+")";var a=Math.min(30,30-30*(g/200));e.appendChild(e.firstChild).style.height=a+"px";r++;b>m+1E3&&(h=Math.round(1E3*r/(b-m)),p=Math.min(p,h),q=Math.max(q,h),i.textContent=h+" FPS ("+p+"-"+q+")",a=Math.min(30,30-30*(h/100)),c.appendChild(c.firstChild).style.height=
+a+"px",m=b,r=0);return b},update:function(){l=this.end()}}};"object"===typeof module&&(module.exports=Stats);
+
+var stats = new Stats();
+stats.setMode(0); // 0: fps, 1: ms
+
+// Align top-left
+stats.domElement.style.position = 'absolute';
+stats.domElement.style.left = '0px';
+stats.domElement.style.top = '0px';
+
+document.body.appendChild( stats.domElement );
+
+    var stage = new PIXI.Container();
+    var renderer = PIXI.autoDetectRenderer( 960, 400, {background: 0xffffff} );
+    var interactionManager = new PIXI.interaction.InteractionManager(renderer, {});
+    var dragAndDropManager = new PIXI.DragAndDropManager(interactionManager);
+
+    document.body.appendChild(renderer.view);
+
+    var examples = [];
+    var buttons = [];
+
+    var items = [
+        "Drag: Default",
+        "Constrain movement",
+        "Cursor style",
+        "Events",
+        "Handles",
+        "Revert position",
+        "Snap to element/grid",
+        "Visual feedback",
+        "Drop: Default",
+        "Accept",
+        "Prevent Propagation",
+        "Revert Draggable",
+        "Drop Tolerance"
+    ];
+
+    for(var i = 0; i < items.length; i++)
+    {
+        examples[i] = new PIXI.Container();
+        examples[i].visible = false;
+        stage.addChild(examples[i]);
+
+        buttons[i] = new PIXI.Button(renderer, {
+            width: 150,
+            height: 30,
+            ninepatch: i > 7 ? "img/blue_button_0*.png" : "img/yellow_button_0*.png",
+            text: { font: "bold 10pt Arial", fill: "#000" },
+            value:items[i],
+            valign: "middle",
+            align: "left",
+            onmouseup: function() {
+                showExample(parseInt(this));
+            }.bind(i+0)
+        });
+
+        buttons[i].x = 640 + (i > 7 ? 160 : 0);
+        buttons[i].y = 10 + (i > 7 ? (i - 8) * 40 : i * 40);
+
+        stage.addChild(buttons[i]);
+    }
+
+    var exampledoc = new PIXI.Container();
+    stage.addChild(exampledoc);
+
+    var curr = null;
+    function showExample(i)
+    {
+        if(curr !== null) examples[curr].visible = false;
+        examples[i].visible = true;
+        curr = i;
+    };
+
+    showExample(0);
+
+    function box(w,h,t,n) {
+        var b = new PIXI.NinePatch(w,h,n||"img/yellow_button_0*.png");
+        if(t)
+        {
+            var tb = new PIXI.Text(t, { font: "11pt arial", wordWrap: true, wordWrapWidth: w-20 });
+                tb.x = 10;
+                tb.y = 10;
+                b.text = tb;
+            b.addChild(tb);
+        }
+        return b;
+    };
+
+    // example 1
+    var dd1 = new box(150,150,"Drag me around");
+        dd1.x = 10;
+        dd1.y = 10;
+        dd1.draggable({manager: dragAndDropManager});
+    examples[0].addChild(dd1);
+
+    // example 2
+
+    var db = new box(600, 200, null, "img/white_button_0*.png");
+        db.x = 10;
+        db.y = 190;
+    examples[1].addChild(db);
+
+    var dd4 = new box(100,100,"I'm contained within the box");
+        dd4.x = 10;
+        dd4.y = 10;
+        dd4.draggable({ containment: db });
+    db.addChild(dd4);
+
+    var dd4_2 = new box(100,100,"Text contained in parent!");
+        dd4_2.x = 120;
+        dd4_2.y = 10;
+        dd4_2.text.draggable({ containment: "parent" });
+    db.addChild(dd4_2);
+
+    var dd2 = new box(100,100,"I can be dragged only vertically");
+        dd2.x = 10;
+        dd2.y = 30;
+        dd2.draggable({ axis: "y", cursor: "n-resize" });
+    examples[1].addChild(dd2);
+
+    var dd3 = new box(100,100,"I can be dragged only horizontally");
+        dd3.x = 120;
+        dd3.y = 30;
+        dd3.draggable({ axis: "x", cursor: "e-resize" });
+    examples[1].addChild(dd3);
+
+    // example 3
+    var dd6 = new box(150,150,"I will always stick to the center (relative to the mouse)");
+        dd6.x = 10;
+        dd6.y = 10;
+        dd6.draggable({ cursor: "move", cursorAt: [ 75, 75 ] });
+    examples[2].addChild(dd6);
+
+    var dd7 = new box(150,150,"My cursor is at left -5 and top -5");
+        dd7.x = 170;
+        dd7.y = 10;
+        dd7.draggable({ cursor: "crosshair", cursorAt: [ -5, -5 ] });
+    examples[2].addChild(dd7);
+
+    // example 4
+    var count = [ 0, 0, 0 ];
+    var dd8 = new box(150,150,"Start: x0\nMove: x0\nStop: x0");
+        dd8.x = 10;
+        dd8.y = 10;
+        dd8.draggable({
+          start: function() {
+            count[ 0 ]++;
+            dd8.text.setText("Start: x"+count[0]+"\nMove: x"+count[1]+"\nStop: x"+count[2]+"");
+          },
+          drag: function() {
+            count[ 1 ]++;
+            dd8.text.setText("Start: x"+count[0]+"\nMove: x"+count[1]+"\nStop: x"+count[2]+"");
+          },
+          stop: function() {
+            count[ 2 ]++;
+            dd8.text.setText("Start: x"+count[0]+"\nMove: x"+count[1]+"\nStop: x"+count[2]+"");
+          }
+        });
+    examples[3].addChild(dd8);
+
+    var count2 = [ 0, 0, 0 ];
+    var dd8_2 = new box(150,150,"Drag me minimum 10px\nStart: x0\nMove: x0\nStop: x0");
+        dd8_2.x = 170;
+        dd8_2.y = 10;
+        dd8_2.draggable({
+          distance: 10,
+          start: function() {
+            count2[ 0 ]++;
+            dd8_2.text.setText("Drag me minimum 10px\nStart: x"+count2[0]+"\nMove: x"+count2[1]+"\nStop: x"+count2[2]+"");
+          },
+          drag: function() {
+            count2[ 1 ]++;
+            dd8_2.text.setText("Drag me minimum 10px\nStart: x"+count2[0]+"\nMove: x"+count2[1]+"\nStop: x"+count2[2]+"");
+          },
+          stop: function() {
+            count2[ 2 ]++;
+            dd8_2.text.setText("Drag me minimum 10px\nStart: x"+count2[0]+"\nMove: x"+count2[1]+"\nStop: x"+count2[2]+"");
+          }
+        });
+    examples[3].addChild(dd8_2);
+
+    // example 5
+    var dd9 = new box(150,150,"I can be dragged only by this handle (text)");
+        dd9.x = 10;
+        dd9.y = 10;
+        dd9.draggable({ handle: dd9.text });
+    examples[4].addChild(dd9);
+
+    var dd10 = new box(150,150,"You can't drag me by this handle. (text)");
+        dd10.x = 170;
+        dd10.y = 10;
+        dd10.draggable({ cancel: dd10.text });
+    examples[4].addChild(dd10);
+
+    // example 6
+    var dd11 = new box(150,150,"Revert the original");
+        dd11.x = 10;
+        dd11.y = 10;
+        dd11.draggable({ revert: true });
+    examples[5].addChild(dd11);
+
+    var dd12 = new box(150,150,"Revert the helper");
+        dd12.x = 170;
+        dd12.y = 10;
+        dd12.draggable({ revert: true, helper: "clone" });
+    examples[5].addChild(dd12);
+
+    // example 7
+    var dd13 = new box(150,150,"Default (snap: true), snaps to all other draggable elements");
+        dd13.x = 10;
+        dd13.y = 10;
+        dd13.draggable({ snap: true });
+    examples[6].addChild(dd13);
+
+    var dd14 = new box(150,150,"I snap to a 20 x 20 grid");
+        dd14.x = 170;
+        dd14.y = 10;
+        dd14.draggable({ grid: [ 20, 20 ] });
+    examples[6].addChild(dd14);
+
+
+    var dd15 = new box(150,150,"I snap to a 80 x 80 grid");
+        dd15.x = 330;
+        dd15.y = 10;
+        dd15.draggable({ grid: [ 80, 80 ] });
+    examples[6].addChild(dd15);
+
+
+    var dd15_2 = new box(80,80,"Mode: Inner","img/blue_button_0*.png");
+        dd15_2.x = 10;
+        dd15_2.y = 300;
+        dd15_2.draggable({ label: "blue", snap: true, snapMode: "inner" });
+    examples[6].addChild(dd15_2);
+
+
+    var dd15_3 = new box(80,80,"Mode: Outer","img/blue_button_0*.png");
+        dd15_3.x = 100;
+        dd15_3.y = 300;
+        dd15_3.draggable({ label: "blue", snap: true, snapMode: "outer", snapSort: true });
+    examples[6].addChild(dd15_3);
+
+
+    var dd15_4 = new box(80,80,"Snap to blue elements","img/blue_button_0*.png");
+        dd15_4.x = 450;
+        dd15_4.y = 300;
+        dd15_4.draggable({ snap: "blue", snapSort: true });
+    examples[6].addChild(dd15_4);
+
+    // example 8
+    var dd16 = new box(150,150,"Original");
+        dd16.x = 10;
+        dd16.y = 10;
+        dd16.draggable({ alpha: 0.7, helper: "original" });
+    examples[7].addChild(dd16);
+
+    var dd17 = new box(150,150,"Semi-transparent clone");
+        dd17.x = 170;
+        dd17.y = 10;
+        dd17.draggable({ alpha: 0.7, helper: "clone" });
+    examples[7].addChild(dd17);
+
+   /* var dd18 = new box(150,150,"I snap to a 80 x 80 grid");
+        dd18.x = 330;
+        dd18.y = 10;
+        dd18.draggable({ grid: [ 80, 80 ] });
+    examples[7].addChild(dd18);*/
+
+    // example 9
+    var dd19 = new box(200, 200, "Drop here", "img/white_button_0*.png");
+        dd19.x = 120;
+        dd19.y = 30;
+        dd19.droppable({ drop: function() { dd19.text.setText("Dropped!"); } });
+    examples[8].addChild(dd19);
+
+    var dd18 = new box(100,100,"Drag me to my target");
+        dd18.x = 10;
+        dd18.y = 30;
+        dd18.draggable({manager: dragAndDropManager});
+    examples[8].addChild(dd18);
+
+    // example 10
+    var dd20 = new box(200, 200, "Drop here", "img/white_button_0*.png");
+        dd20.x = 260;
+        dd20.y = 30;
+        dd20.droppable({
+            accept: "draggable",
+            drop: function() { dd20.text.setText("Dropped!"); }
+        });
+    examples[9].addChild(dd20);
+
+    var dd21 = new box(100,100,"Drag me to my target");
+        dd21.x = 10;
+        dd21.y = 30;
+        dd21.draggable({ label: "draggable" });
+    examples[9].addChild(dd21);
+    examples[9].x = 100;
+
+    var dd22 = new box(100,100,"I'm draggable but can't be dropped");
+        dd22.x = 120;
+        dd22.y = 30;
+        dd22.draggable({manager: dragAndDropManager});
+    examples[9].addChild(dd22);
+
+    // example 11
+    var dd23 = new box(200, 200, "Outer droppable", "img/white_button_0*.png");
+        dd23.x = 300;
+        dd23.y = 30;
+        dd23.droppable({
+            drop: function() { dd23.text.setText("Dropped!"); }
+        });
+    examples[10].addChild(dd23);
+
+    var dd25 = new box(180, 120, "Inner droppable (not greedy)", "img/white_button_0*.png");
+        dd25.x = 10;
+        dd25.y = 50;
+        dd25.droppable({
+            drop: function() { dd25.text.setText("Dropped!"); }
+        });
+    dd23.addChild(dd25);
+
+    var dd24 = new box(200, 200, "Outer droppable", "img/white_button_0*.png");
+        dd24.x = 10;
+        dd24.y = 190;
+        dd24.droppable({
+            drop: function() { dd24.text.setText("Dropped!"); }
+        });
+    examples[10].addChild(dd24);
+
+    var dd26 = new box(180, 120, "Inner droppable (greedy)", "img/white_button_0*.png");
+        dd26.x = 10;
+        dd26.y = 50;
+        dd26.droppable({
+            greedy: true,
+            drop: function() { dd26.text.setText("Dropped!"); }
+        });
+    dd24.addChild(dd26);
+
+    var dd27 = new box(100,100,"Drag me to my target");
+        dd27.x = 10;
+        dd27.y = 30;
+        dd27.draggable({manager: dragAndDropManager});
+    examples[10].addChild(dd27);
+
+    // example 12
+    var dd28 = new box(200, 200, "Drop here", "img/white_button_0*.png");
+        dd28.x = 260;
+        dd28.y = 30;
+        dd28.droppable({
+            drop: function() { dd28.text.setText("Dropped!"); }
+        });
+    examples[11].addChild(dd28);
+
+    var dd29 = new box(100,100,"I revert when I'm dropped");
+        dd29.x = 10;
+        dd29.y = 30;
+        dd29.draggable({ revert: "valid" });
+    examples[11].addChild(dd29);
+
+    var dd30 = new box(100,100,"I revert when I'm not dropped");
+        dd30.x = 120;
+        dd30.y = 30;
+        dd30.draggable({ revert: "invalid" });
+    examples[11].addChild(dd30);
+
+
+
+    // example 13
+    var dd31 = new box(150, 150, "Intersect", "img/white_button_0*.png");
+        dd31.x = 120;
+        dd31.y = 30;
+        dd31.droppable({ tolerance: "intersect", drop: function() { dd31.text.setText("Dropped!"); } });
+    examples[12].addChild(dd31);
+
+    var dd32 = new box(150, 150, "Fit", "img/white_button_0*.png");
+        dd32.x = 280;
+        dd32.y = 30;
+        dd32.droppable({ tolerance: "fit", drop: function() { dd32.text.setText("Dropped!"); } });
+    examples[12].addChild(dd32);
+
+    var dd33 = new box(150, 150, "Pointer", "img/white_button_0*.png");
+        dd33.x = 120;
+        dd33.y = 190;
+        dd33.droppable({ tolerance: "pointer", drop: function() { dd33.text.setText("Dropped!"); } });
+    examples[12].addChild(dd33);
+
+    var dd34 = new box(150, 150, "Touch", "img/white_button_0*.png");
+        dd34.x = 280;
+        dd34.y = 190;
+        dd34.droppable({ tolerance: "touch", drop: function() { dd34.text.setText("Dropped!"); } });
+    examples[12].addChild(dd34);
+
+    var dd35 = new box(100,100,"Drag me to my target");
+        dd35.x = 10;
+        dd35.y = 30;
+        dd35.draggable({manager: dragAndDropManager});
+    examples[12].addChild(dd35);
+
+    function animate()
+    {
+        stats.begin();
+        requestAnimationFrame(animate);
+        renderer.render(stage);
+        stats.end();
+    };
+
+    animate();
+
+    </script>
+
+</body>
+</html>

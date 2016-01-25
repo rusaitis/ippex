@@ -1,3 +1,21 @@
+function shuffle(array) {
+  var m = array.length, t, i;
+
+  // While there remain elements to shuffle…
+  while (m) {
+
+    // Pick a remaining element…
+    i = Math.floor(Math.random() * m--);
+
+    // And swap it with the current element.
+    t = array[m];
+    array[m] = array[i];
+    array[i] = t;
+  }
+
+  return array;
+}
+
 function makeAntenna1 (obj,R,l) {
     obj.moveTo(Math.cos(-rad)*R,Math.sin(-rad)*R);
     obj.lineTo(Math.cos(-3*rad/4)*R,Math.sin(-3*rad/4)*R);

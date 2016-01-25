@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.2 r9819"
+   width="184.00256"
+   height="183.96747"
+   sodipodi:docname="inner.svg">
+  <metadata
+     id="metadata8">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs6" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1002"
+     inkscape:window-height="749"
+     id="namedview4"
+     showgrid="false"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:zoom="2.2250293"
+     inkscape:cx="86.272507"
+     inkscape:cy="79.236629"
+     inkscape:window-x="448"
+     inkscape:window-y="231"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg2" />
+  <path
+     style="color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#013f77;stroke-width:5;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+     d="M 84.194304,181.21471 C 48.528587,178.64199 16.578923,152.58398 6.1906959,117.59529 -7.4469481,71.662222 17.758918,22.663072 62.933813,7.289052 c 46.313717,-15.76159 96.460927,8.42596 113.324267,54.65981 11.76977,32.26892 3.29772,69.253938 -21.45511,93.663078 -18.91285,18.65023 -43.48315,27.55945 -70.608666,25.60277 z"
+     id="path3834"
+     inkscape:connector-curvature="0"
+     inkscape:export-filename="/Users/adomingu/Google Drive/Github/ippex/tokamak/img/innerWall.png"
+     inkscape:export-xdpi="90"
+     inkscape:export-ydpi="90" />
+  <path
+     inkscape:export-ydpi="90"
+     inkscape:export-xdpi="90"
+     inkscape:export-filename="/Users/adomingu/Google Drive/Github/ippex/tokamak/img/innerWall.png"
+     inkscape:connector-curvature="0"
+     id="path3762"
+     d="M 89.06979,125.41636 C 75.705481,124.45234 63.733615,114.68813 59.841041,101.57751 54.730876,84.365924 64.175772,66.005441 81.103266,60.244639 98.45749,54.33861 117.24816,63.401933 123.56702,80.726228 c 4.41026,12.091495 1.2357,25.950162 -8.03944,35.096512 -7.08684,6.98843 -16.293585,10.32681 -26.45779,9.59362 z"
+     style="color:#000000;fill:#00202b;fill-opacity:1;fill-rule:nonzero;stroke:#999999;stroke-width:1.87355113000000006;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+</svg>

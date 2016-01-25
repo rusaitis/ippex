@@ -295,7 +295,7 @@ function calcScore(temperature){
 
     var pbetfa = (2.*MU_0/(mag*mag))*(2./3.)*(znsour*ztauth*zeavg);
     var zbetth = (2.*MU_0/(mag*mag))*densreal * ( 1. + rnine)*K_BOLT*tempkev;
-    var beta  = 100 * pbetfa + zbetth;  //In percentage
+    var beta  = 100 * (pbetfa + zbetth);  //In percentage
 
 
     //***********************************************

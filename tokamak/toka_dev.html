@@ -1,0 +1,209 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>IPPEX</title>
+    <link rel="stylesheet" href="./toka.css">
+    <link rel="stylesheet" href="../bower_components/katex/dist/katex.min.css">
+    <script src="../bower_components/katex/dist/katex.min.js"></script>
+    <script src="../bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="../bower_components/pixi/bin/pixi.min.js"></script>
+    <script src="../bower_components/pixi/bin/pixi.min.js"></script>
+    <script src="../bower_components/dat.gui/dat.gui.js"></script>
+    <script src="../bower_components/stats.js/build/stats.min.js"></script>
+    <script src="../bower_components/jquery/dist/jquery.min.js"></script>
+    <!--<script src="../tink/bin/tink.js"></script>-->
+    <script src="../PIXI.draggable/bin/pixi.draggable.js"></script>
+    <!--<script src="../sound.js/sound.js"></script>-->
+    <script src="../howler.js/howler.js"></script>
+    <script src="../libs/util/TweenMax.min.js"></script>
+    <script src="../libs/kinematica/ui.js"></script>
+    <script src="./toka_physics_dev.js"></script>
+    <script src="./functions_dev.js"></script>
+    <script src="./Ziggurat.js"></script>
+    <script src="./setup.js"></script>
+    <script src="./intro.js"></script>
+    <script src="./play.js"></script>
+    <script src="./endgame.js"></script>
+</head>
+
+<body>
+    <div align="center">
+        <canvas id="game-canvas" width="1010" height="600"></canvas>
+    </div>
+<!--     <div id="temperature" class="title" style="font-size : 1px; position: absolute; top: 475px; left: 230px; color: #89ff8f; width:500px">
+    </div> -->
+
+
+    <script defer>
+
+    //Parameters
+
+
+
+
+    var epsi = rmin/rmaj;
+    var solFactor = 5;
+    var machineSize = 365;
+    var scaleTorus = machineSize/(2*((solFactor+1)/solFactor+epsi));
+    // var epsi = 0.8;
+    var rad = 0.15;
+    var introPlayed = false;
+    var Torus = {R:scaleTorus, r:scaleTorus * epsi};
+    var Machine = {sol:Torus.R/solFactor , diam: 2*(Torus.R + Torus.r + Torus.R/solFactor)};
+    console.log("Machine diameter: " + Machine.diam);
+    var Plasma = {v: 1, wSpread: 0.5/1000, T: 10000};
+    var ext = {
+        dens : {
+            value : 1,
+            min : 0.1,
+            max : 10
+        },
+        mag : {
+            value : 3,
+            min : 1,
+            max : 14
+        },
+        aux : {
+            value : 0,
+            min : 0,
+            max : 10
+        }
+    };
+    var count = 0;
+    var torCenter = {x : 542.3 , y : 298.8};
+    var zig = new Ziggurat();
+    var showFields
+    var antennaLength = 100;
+    var coils = [];
+    var glowcoils = [];
+    var finalTemp = 0;
+    var stateVar = {
+        plasmaon : false,
+        justexploded : true,
+        mute : true,
+        bisec : true,
+        endonce : true,
+        lastDisruptionStart : false,
+        gaussianSpeeds : true,
+        forceCalculation : false,
+        countStart : {
+            state : false,
+            timer : 0
+        },
+        countRestart : {
+            state : false,
+            timer : 0
+        },
+        reactor : true,
+        exchanger : false,
+        city : false
+    };
+    var buttonState = {
+        mute : true,
+        bisec : true,
+        countStart : false,
+        reactor : true,
+        exchanger : false,
+        city : false
+    };
+    var lastmag = 0;
+    var lastdens = 0;
+    var lastaux = 0;
+    var disruptions = 0;
+    var maxDisruptions = 3;
+    var highScore = 0;
+
+
+
+    //PIXI start
+
+    var stage = new PIXI.Container(),
+        renderer = PIXI.autoDetectRenderer(1010,660,{
+            view : document.getElementById("game-canvas"),
+            antialiasing : false,
+            transparent : false,
+            resolution : 1}
+            );
+    var interactionManager = new PIXI.interaction.InteractionManager(renderer, {});
+    var dragAndDropManager = new PIXI.DragAndDropManager(interactionManager);
+
+    stage.interactive = true;
+
+    var introContainer = new PIXI.Container();
+    var startMenu = new PIXI.Container();
+    var startManual = new PIXI.Container();
+    var gameContainer = new PIXI.Container();
+    var reactorBot = new PIXI.Container();
+    var reactorTop = new PIXI.Container();
+    var bottomLinesContainer = new PIXI.Container();
+    var controls = new PIXI.Container();
+    var topLinesContainer = new PIXI.Container();
+    var rfContainer = new PIXI.Container();
+    var rfCover = new PIXI.Container();
+    var vessel = new PIXI.Container();
+    var container = new PIXI.Container();
+    var coilcontainer = new PIXI.Container();
+    var topControls = new PIXI.Container();
+    var exchangerContainer = new PIXI.Container();
+    var cityContainer = new PIXI.Container();
+    var alertContainer = new PIXI.Container();
+    var endContainer = new PIXI.Container();
+
+
+    stage.addChild(introContainer);
+    introContainer.addChild(startMenu);
+    introContainer.addChild(startManual);
+    stage.addChild(gameContainer);
+    gameContainer.addChild(reactorBot);
+    reactorBot.addChild(bottomLinesContainer);
+    gameContainer.addChild(controls);
+    gameContainer.addChild(reactorTop);
+    reactorTop.addChild(topLinesContainer);
+    reactorTop.addChild(rfContainer);
+    reactorTop.addChild(rfCover);
+    reactorTop.addChild(vessel);
+    reactorTop.addChild(container);
+    reactorTop.addChild(coilcontainer);
+    reactorTop.addChild(alertContainer);
+    gameContainer.addChild(topControls);
+    gameContainer.addChild(exchangerContainer);
+    gameContainer.addChild(cityContainer);
+    stage.addChild(endContainer);
+    introContainer.visible = false;
+    gameContainer.visible = false;
+    endContainer.visible = false;
+
+
+
+
+    var state = intro;
+
+
+    var loader = PIXI.loader;
+    loader
+        .add([
+        "img/ippexsprites.json"
+        ])
+        .on("progress", loadProgressHandler)
+        .load(setup);
+
+
+
+
+    function gameLoop(){
+
+        requestAnimationFrame(gameLoop);
+        state();
+        renderer.render(stage);
+        count += 0.1;
+    }
+
+
+
+
+
+    </script>
+
+
+</body>

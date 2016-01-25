@@ -16,19 +16,21 @@
 </head>
 
 <body>
-
-<!-- <div id="title" class="title" style="position: absolute; top: 10px; left: 100px;'">
+  <div align="center">
+    <canvas id="game-canvas" width="1010" height="600"></canvas>
+  </div>
+<div id="title" class="title" style="position: absolute; top: 10px; left: 100px;'">
     <i class="fa fa-globe fa-inverse fa-3x"></i>
     <input type="text" id="status" class="console"></input>
     <textarea type="text" id="console" class="console"></textarea>
-</div> -->
-<!-- <div id="score" class="title" style="position: absolute; top: 550px; left: 100px;'">
+</div>
+<div id="score" class="title" style="position: absolute; top: 550px; left: 100px;'">
 SCORE: 0
-</div> -->
-<!-- <div id="temperatureDiv" class="title" style="position: absolute; top: 600px; left: 100px; color: #89ff8f;'">
+</div>
+<div id="temperatureDiv" class="title" style="position: absolute; top: 600px; left: 100px; color: #89ff8f;'">
 TEMPERATURE: 0
 <input type="text" id="temperature" class="console temperature"></input>
-</div> -->
+</div>
 <!-- <div id="container"></div> -->
 <!-- <script src="../libs/util/dat.gui.min.js"></script> -->
 <script src="../libs/util/TweenMax.min.js"></script>
@@ -138,12 +140,14 @@ var zig = new Ziggurat();
 //==============================================================================
 
 
-var renderer = PIXI.autoDetectRenderer(width, height, {backgroundColor : 0x0e0e0e});
-document.body.appendChild(renderer.view);
+var stage = new PIXI.Container();
+var renderer = PIXI.autoDetectRenderer(1010, 600, {view:document.getElementById("game-canvas"), backgroundColor : 0x0e0e0e});
+stage.interactive = true;
+
+// document.body.appendChild(renderer.view);
 
 // debugger;
 // create the root of the scene graph
-var stage = new PIXI.Container();
 
 // ///////////////////////////////////////////////////////////
 // PIXI
@@ -152,7 +156,7 @@ var stage = new PIXI.Container();
 // stage.position.x = renderer.width / 2;
 // stage.position.y = renderer.height / 2;
 
-stage.interactive = true;
+
 
 var container = new PIXI.Container();
 container.position.x = renderer.width / 2;
@@ -1036,8 +1040,8 @@ function animate() {
     displayScore();
     var lastTime = Date.now();
 
-    // document.getElementById("temperature").value = ("TEMPERATURE: " + finalTemp);
-    // document.getElementById("console").value = ('Mag: ' + magVal + '\n' + 'Dens: ' + densVal + '\n' + 'Pow: ' + powVal + '\n\n' + 'Temp: ' + finalTemp  + '\n' + 'Score: ' + finalScore + '\n\n' + 'P_oh: ' + finalOut.P_oh * 1.e-6 + '\n' + 'P_alpha: ' + finalOut.P_alpha * 1.e-6 + '\n' + 'P_cond: ' + finalOut.P_cond * 1.e-6 + '\n' + 'P_rad: ' + finalOut.P_rad * 1.e-6 + '\n\n' + 'Beta thermal: ' + finalOut.beta_th + '\n' + 'Beta alpha: ' + finalOut.beta_falpha + '\n'+ 'Beta: ' + finalOut.beta + '\n' + 'Beta max: ' + finalOut.betamax + '\n\n' + 'Density: ' + finalOut.densreal*1.e-20 + '\n' + 'Dens_max: ' + finalOut.densmax*1.e-20 + '\n' + 'scale: ' + scale + '\n');
+    document.getElementById("temperature").value = ("TEMPERATURE: " + finalTemp);
+    document.getElementById("console").value = ('Mag: ' + magVal + '\n' + 'Dens: ' + densVal + '\n' + 'Pow: ' + powVal + '\n\n' + 'Temp: ' + finalTemp  + '\n' + 'Score: ' + finalScore + '\n\n' + 'P_oh: ' + finalOut.P_oh * 1.e-6 + '\n' + 'P_alpha: ' + finalOut.P_alpha * 1.e-6 + '\n' + 'P_cond: ' + finalOut.P_cond * 1.e-6 + '\n' + 'P_rad: ' + finalOut.P_rad * 1.e-6 + '\n\n' + 'Beta thermal: ' + finalOut.beta_th + '\n' + 'Beta alpha: ' + finalOut.beta_falpha + '\n'+ 'Beta: ' + finalOut.beta + '\n' + 'Beta max: ' + finalOut.betamax + '\n\n' + 'Density: ' + finalOut.densreal*1.e-20 + '\n' + 'Dens_max: ' + finalOut.densmax*1.e-20 + '\n' + 'scale: ' + scale + '\n');
 
     Plasma.v = 1 + 3 * Params.Pow/1000;
     // iterate through the dudes and update their position
