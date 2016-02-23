@@ -1,0 +1,154 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>PIXI DEMO</title>
+    <style>
+        body{
+          margin:0;
+          padding:0;
+        }
+
+        #canvas-holder{
+          width:1024px;
+          height:768px;
+          background-color:#000000;
+          margin:auto;
+        }
+
+        .pixi-test{
+          width:100%;
+          height:100%;
+          background-color:#220000;
+        }
+    </style>
+    <link rel="stylesheet" href="../bower_components/katex/dist/katex.min.css">
+    <script src="../bower_components/katex/dist/katex.min.js"></script>
+</head>
+
+<body>
+
+    <div id="appPanel"></div>
+    <div id="container"></div>
+    <script src="../js/stats.min.js"></script>
+    <script src="../js/dat.gui.min.js"></script>
+    <!-- // <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> -->
+    <!-- // <script src="//cdnjs.cloudflare.com/ajax/libs/pixi.js/1.5.3/pixi.js"></script> -->
+    <script src="../js/TweenMax.min.js"></script>
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../bower_components/pixi/bin/pixi.min.js"></script>
+    <!-- // <script src="js/jquery.mobile-1.4.5.min.js"></script> -->
+    <!-- // <script src="../js/konva.min.js"></script> -->
+    <script src="../js/ui.js"></script>
+    <!-- // <script src="../js/math.js"></script> -->
+    <!-- // <script src="js/ui.js"></script> -->
+    <!-- // <script src="js/slider.js"></script> -->
+    <!-- // <script src="js/button.js"></script> -->
+    <script defer="defer">
+
+//==============================================================================
+//                                  START
+//==============================================================================
+
+// parameters
+var Params = function() {
+  this.add = 46;
+  this.mod = 11;
+  this.speed = 7;
+  this.distance = 303;
+};
+var params = new Params();
+var gui = new dat.GUI();
+gui.add(params, 'add', 0, 50);
+gui.add(params, 'mod', 0, 30);
+gui.add(params, 'speed', 0, 10);
+gui.add(params, 'distance', 0, 500);
+
+// stats
+var stats = new Stats();
+stats.domElement.style.position = 'absolute';
+stats.domElement.style.left = '0px';
+stats.domElement.style.top = '0px';
+document.body.appendChild( stats.domElement );
+
+// PIXI
+// You can use either PIXI.WebGLRenderer or PIXI.CanvasRenderer
+var renderer = new PIXI.CanvasRenderer(width, height);
+document.body.appendChild(renderer.view);
+var stage = new PIXI.Stage;
+
+// datas
+var POSITION_DEFAULT = new PIXI.Point(width/2, height/2);
+
+var dots = [],
+    dotsToRmv = [],
+    dot = null,
+    dotIndex = 0,
+    dotTexture = null;
+
+var textures = [
+  PIXI.Texture.fromImage("http://yoann-gueny.fr/elements/particle-1.png")
+];
+
+var count = 0;
+
+// render
+requestAnimationFrame(animate);
+function animate() {
+
+  stats.begin();
+
+  dotsToRmv = [];
+
+  // create dots
+  for(var i = 0, len = params.add; i < len; i++) {
+
+    count++;
+
+    dotTexture = textures[Math.floor(Math.random() * textures.length)];
+    dot = new PIXI.Sprite(dotTexture);
+    dot.cos = Math.cos(count / params.mod);
+    dot.sin = Math.sin(count / params.mod);
+    dot.radius = 0;
+    dot.position.x = POSITION_DEFAULT.x;
+    dot.position.y = POSITION_DEFAULT.y;
+    stage.addChild(dot);
+
+    dots.push(dot);
+  }
+
+  // updates dots
+  for(var i = 0, len = dots.length; i < len; i++) {
+
+    dot = dots[i];
+    dot.radius += params.speed;
+    dot.alpha = 1 - dot.radius / params.distance;
+    dot.position.x = POSITION_DEFAULT.x + dot.cos * dot.radius;
+    dot.position.y = POSITION_DEFAULT.y + dot.sin * dot.radius;
+
+    // get dots out of the area
+    if (dot.radius > params.distance) dotsToRmv.push(dot);
+  }
+
+  // remove dots out of the area
+  for(var i = 0, len = dotsToRmv.length; i < len; i++) {
+
+    dot = dotsToRmv[i];
+    dotIndex = dots.indexOf(dot);
+    dots.splice(dotIndex, dotIndex + 1);
+
+    stage.removeChild(dot);
+    dot = null;
+  }
+
+  renderer.render(stage);
+
+  requestAnimationFrame(animate);
+
+  stats.end();
+}
+    </script>
+
+</body>
+
+</html>

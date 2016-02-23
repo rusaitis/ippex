@@ -1,0 +1,16 @@
+start
+m -2 -2
+l -2  2
+l  2  2
+l  2 -2
+l -2 -2
+end
+
+#Marker 2: Diamond
+start
+m  0  2
+l  2  0
+l  0 -2
+l -2  0 
+l  0  2
+end

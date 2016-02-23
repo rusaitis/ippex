@@ -1,0 +1,57 @@
+To run these applications, the list of directories shown below must appear 
+either in the CLASSPATH (where classes.zip is automatically added) variable 
+or in the -classpath option of javac and java:
+1) The current directory, "."
+2) The parent directory of the rootsolvers package, e.g., the same parent
+   as this directory, ".."
+3) The directory containing the system files, e.g., 
+   /usr/local/java/lib/classes.zip
+
+For example, 
+
+javac -classpath .:..:/usr/local/java/lib/classes.zip SolversTest.java
+
+java -classpath .:..:/usr/local/java/lib/classes.zip SolversTest
+
+Note that on our Sun workstations, we have multiple Java distributions
+accessible. The classes.zip and java used here should be from the same
+release. E.g., if java V. 1.1.3 were the default,
+
+java -classpath .:..:/usr/local/jdk1.1.3/lib/classes.zip SolversTest
+
+or as is now the standard:
+
+java -classpath .:..:/usr/java/lib/classes.zip SolversTest
+
+This now also seems to work (from the directory above this one):
+
+javac TestApplications/SolversTest.java
+
+Note that since we have replaced the RoundedDouble class with Java's
+NumberFormat, the RoundedDoubleTest is being keeped only for historical
+purposes.
+
+On a Windows machine, using the Command Prompt window:
+
+java -classpath .;.. SolversTest
+
+Or, with Cygwin's bash shell,
+
+java -classpath ".;.." SolversTest
+
+These options work with jdb as well.
+
+UPDATED information - TestApplications are now in a separate package
+
+At least in cygwin (need to check other systems), you can now run
+both javac and java in the directory above this one without
+specifying a classpath.  E.g.:
+
+javac TestApplications/SolversTest.java
+java TestApplications/SolversTest
+
+
+
+
+
+

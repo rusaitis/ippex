@@ -1,0 +1,210 @@
+<HTML>
+<HEAD>
+  <META NAME="GENERATOR" CONTENT="Adobe PageMill 2.0 Mac">
+  <TITLE>Application form for Plasma Science Fusion Energy Institute</TITLE>
+</HEAD>
+<BODY>
+
+<FORM METHOD="POST" ACTION="/htbin/cgi-mailto2/azwicker" ENCTYPE="x-www-form-encoded">
+<P ALIGN=CENTER><B><FONT SIZE=+1>Plasma Science and Fusion Energy Institute
+</FONT></B></P>
+
+<P ALIGN=CENTER><B><FONT SIZE=+1>for High School Physics Teachers</FONT></B></P>
+
+<P ALIGN=CENTER><B><FONT SIZE=+1>July 19-30, 1999</FONT></B></P>
+
+<P ALIGN=CENTER><B>APPLICATION FORM</B></P>
+
+<P ALIGN=CENTER><B><FONT COLOR="#FF0000">Deadline for receipt of applications
+is April 30, 1999</FONT></B></P>
+
+<P ALIGN=CENTER>(Any problems with this form, please contact Andrew Post-Zwicker
+immediately. azwicker@pppl.gov, 609-243-2150</P>
+<P>You may also choose to download a PDF version of the application to print out on your local printer
+ <A HREF="Application.pdf">here</A>.</P>
+ 
+<P ALIGN=CENTER><HR></P>
+
+<P ALIGN=CENTER>It is <B>strongly suggested</B> that you answer the longer
+sections of the application form in a separate document that you<B> save
+</B>on your hard drive and then cut and paste this information into the
+form. This is to minimize the possibility of losing any of your work while
+filling out the form.  The SUBMIT button at the bottom of this page sends
+the complete application.  Please make sure that all information is accurate before
+SUBMITing it.</P>
+
+<P ALIGN=CENTER><HR></P>
+
+<P><B>PERSONAL INFORMATION</B></P>
+
+<P><B>Name </B><INPUT NAME="name" TYPE="text" SIZE="30"></P>
+
+<P><B>SS # </B><INPUT NAME="SS #" TYPE="text" SIZE="12"></P>
+
+<P><B>Home Address:</B><INPUT NAME="Address" TYPE="text" SIZE="50"></P>
+
+<P>Phone<INPUT NAME="phone" TYPE="text" SIZE="15"><B> </B></P>
+
+<P>Email<INPUT NAME="email" TYPE="text" SIZE="30"><B> </B></P>
+
+<P>&nbsp;</P>
+
+<P><B>TEACHING INFORMATION</B></P>
+
+<P><B>School Name &amp; Address: (where presently teaching)</B></P>
+
+<P><INPUT NAME="School" TYPE="text" SIZE="60"></P>
+
+<P>School Phone <INPUT NAME="School phone" TYPE="text" SIZE="30"></P>
+
+<P>Principal's Name<INPUT NAME="principal's name" TYPE="text" SIZE="30"></P>
+
+<P>&nbsp;</P>
+
+<P><B>EDUCATIONAL INFORMATION</B></P>
+
+<P>List in reverse chronological order the colleges/universities attended
+where a formal degree was earned.</P>
+
+<P>University,<B> </B>Highest<B> </B>Degree Earned,<B> </B>Major<B>,</B>
+Award Date</P>
+
+<P><TEXTAREA NAME="colleges attended" ROWS="7" COLS="80"
+></TEXTAREA></P>
+
+<P>&nbsp;</P>
+
+<P><B>1.</B> <B>EDUCATIONAL EXPERIENCE:</B></P>
+
+<P>&nbsp;</P>
+
+<P>A. List undergraduate science/math/technology courses taken.</P>
+
+<P><TEXTAREA NAME="undergraduate courses" ROWS="7" COLS="60"
+></TEXTAREA></P>
+
+<P>&nbsp;</P>
+
+<P>B. List graduate science/math/technology courses taken.</P>
+
+<P><TEXTAREA NAME="graduate courses" ROWS="7" COLS="60"
+></TEXTAREA></P>
+
+<P>&nbsp;</P>
+
+<P><B>2.</B> <B>PROFESSIONAL EXPERIENCE:</B></P>
+
+<P>&nbsp;</P>
+
+<P>A. Number of years you have taught science/math/technology classes (include
+the sum of part-time teaching assignments.) <INPUT NAME="years experience"
+TYPE="text" SIZE="10"></P>
+
+<P>1) Teaching assignments this school year (include grade levels for each):</P>
+
+<P><TEXTAREA NAME="current teaching assignment" ROWS="7" COLS="60"
+></TEXTAREA></P>
+
+<P>2) Anticipated teaching assignments next year (if different from above):</P>
+
+<P><TEXTAREA NAME="future teaching assignment" ROWS="7" COLS="60"
+></TEXTAREA></P>
+
+<P>B. How have you advanced your professional development (e.g., workshops,
+institutes, conferences, research experience) during the last 3 to 5 years?</P>
+
+<P><TEXTAREA NAME="professional development" ROWS="7" COLS="60"
+></TEXTAREA></P>
+
+<P>C. Describe your leadership activities, contributions to science, math
+or technology education (in-class or out of class), or other outstanding
+accomplishments during the last 3 to 5 years.</P>
+
+<P><TEXTAREA NAME="leadership activities" ROWS="7" COLS="60"
+></TEXTAREA></P>
+
+<P>D. List any relevant publications that you may have.</P>
+
+<P><TEXTAREA NAME="Publications" ROWS="7" COLS="60"
+></TEXTAREA></P>
+
+<P>E. Briefly describe your teaching philosophy. Include how your teaching
+is innovative and describe your goals when teaching. Include a lesson plan,
+if available. If necessary, this can be faxed instead of included here (609-243-2112).</P>
+
+<P><TEXTAREA NAME="Teaching Philosophy" ROWS="7" COLS="60"
+></TEXTAREA></P>
+
+<P><B>3.</B> <B>EQUIPMENT EXPERIENCE:</B></P>
+
+<P>&nbsp;</P>
+
+<P>A. List scientific or electronic equipment experience and the extent
+of this experience. Have you ever worked with high voltage power supplies?
+Other electrical equipment? Vacuum pumps? Optics/Spectrometers? Lasers?</P>
+
+<P><TEXTAREA NAME="equipment experience" ROWS="7" COLS="60"
+></TEXTAREA></P>
+
+<P>B. List computer hardware and software experience,  your level of proficiency
+and length of experience</P>
+
+<P><TEXTAREA NAME="computer experience" ROWS="7" COLS="60"
+></TEXTAREA></P>
+
+<P>&nbsp;</P>
+
+<P>4. Do you use the Internet with your students? How? Do you use email
+regularly?</P>
+
+<P><TEXTAREA NAME="Internet experience" ROWS="7" COLS="60"
+></TEXTAREA></P>
+
+<P>&nbsp;</P>
+
+<P>5. How did you learn about the Institute? (Please check)</P>
+
+<P>&nbsp;</P>
+
+<P><INPUT TYPE="checkbox" NAME="school district" VALUE="on">Through the
+state Department of Education, school district, school administration.</P>
+
+<P><INPUT TYPE="checkbox" NAME="journal" VALUE="on">Announcement in a professional
+journal. <INPUT NAME="Professional Journal" TYPE="text" SIZE="30"></P>
+
+<P><INPUT TYPE="checkbox" NAME="direct mailing" VALUE="on">Direct mailing.</P>
+
+<P><INPUT TYPE="checkbox" NAME="DoE Lab" VALUE="on"> DOE Laboratory. Please
+name. <INPUT NAME="DoE Laboratory" TYPE="text" SIZE="30"></P>
+
+<P><INPUT TYPE="checkbox" NAME="Other" VALUE="on">Other (Please be specific).
+<INPUT NAME="Other details" TYPE="text" SIZE="30"></P>
+
+<P>&nbsp;</P>
+
+<P><B>APPLICANT CERTIFICATION</B></P>
+
+<P>I certify that the information contained herein is true, complete, and
+correct, and that I plan <B>to return to the classroom as a teacher for
+the following school year.</B></P>
+
+<P>&nbsp;</P>
+
+<P>By checking this box, I acknowledge that my application is complete and
+ready for review.<INPUT TYPE="checkbox" NAME="Application complete" VALUE=
+"on"></P>
+
+<P ALIGN=CENTER><INPUT NAME="Application submitted" TYPE="submit" VALUE=
+"Submit"></P>
+
+<P>&nbsp;</P>
+
+<P>&nbsp;</P>
+
+<P>&nbsp;</P>
+
+<P>&nbsp;</P>
+
+<P>&nbsp;</FORM>
+</BODY>
+</HTML>

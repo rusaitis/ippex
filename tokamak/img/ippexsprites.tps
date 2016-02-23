@@ -4,7 +4,7 @@
         <key>fileFormatVersion</key>
         <int>3</int>
         <key>texturePackerVersion</key>
-        <string>4.0.0</string>
+        <string>4.0.2</string>
         <key>fileName</key>
         <string>/Users/adomingu/Google Drive/Github/ippex/tokamak/img/ippexsprites.tps</string>
         <key>autoSDSettings</key>
@@ -244,6 +244,8 @@
             <filename>city.png</filename>
             <filename>exchanger.png</filename>
             <filename>highScore.png</filename>
+            <filename>glowcoils_whiter.png</filename>
+            <filename>modaltest.png</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

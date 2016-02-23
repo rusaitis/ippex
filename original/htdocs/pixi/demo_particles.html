@@ -1,0 +1,178 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>PIXI DEMO</title>
+    <style>
+        html,body{
+            margin:0;
+            padding:0;
+          min-height: 1000px;
+          height:100%;
+            width:100%;
+        }
+        #container, #container canvas {
+            margin:0;
+            padding:0;
+            height:100%;
+            width:100%;
+            display:block;
+        }
+    </style>
+    <link rel="stylesheet" href="../bower_components/katex/dist/katex.min.css">
+    <script src="../bower_components/katex/dist/katex.min.js"></script>
+</head>
+
+<body>
+
+    <div id="container"></div>
+    <!-- // <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> -->
+    <!-- // <script src="//cdnjs.cloudflare.com/ajax/libs/pixi.js/1.5.3/pixi.js"></script> -->
+    <script src="../js/TweenMax.min.js"></script>
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../bower_components/pixi/bin/pixi.min.js"></script>
+    <!-- // <script src="js/jquery.mobile-1.4.5.min.js"></script> -->
+    <!-- // <script src="../js/konva.min.js"></script> -->
+    <script src="../js/ui.js"></script>
+    <!-- // <script src="../js/math.js"></script> -->
+    <!-- // <script src="js/ui.js"></script> -->
+    <!-- // <script src="js/slider.js"></script> -->
+    <!-- // <script src="js/button.js"></script> -->
+    <script defer="defer">
+
+//==============================================================================
+//                                  START
+//==============================================================================
+    $(window).load( function () {
+    var mainw = $("#container").width(),
+        mainh = $("#container").height(),
+        mousex = Math.floor(mainw/2),
+        mousey = Math.floor(mainh/2);
+
+    $("#container").on("mousemove", function (e) {
+        mousex = e.pageX;
+        mousey = e.pageY;
+    });
+
+  //asdfasdf
+    var stage = new PIXI.Stage(0xFFFFFF);
+    var renderer = PIXI.autoDetectRenderer( mainw, mainh );
+    var world = [];
+
+  renderer.view.style.display = "block";
+
+    // add render view to DOM
+    $("#container").append(renderer.view);
+
+    function randomNumber(min, max) {
+        return Math.floor(Math.random() * (1 + max - min) + min);
+    }
+
+    function Particle ( config, seed, stage ) {
+    this.config = config;
+        this.x = config.x;
+        this.y = config.y;
+    this.seed = seed;
+        this.radius = config.radius;
+        this.color = config.color;
+
+        this.graphics = initGraphics( stage, this );
+        this.tween = addParticleTween(this, seed, 1);
+    }
+  Particle.prototype.draw = function () {
+    this.graphics.x = this.x;
+    this.graphics.y = this.y;
+    //console.log(this.graphics.x);
+  }
+
+  function initGraphics ( stage, _self ) {
+    var _graphics = new PIXI.Graphics();
+    var rgb =  _self.color.b | (_self.color.g << 8) | (_self.color.r << 16);
+    _graphics.beginFill( rgb, _self.color.a );
+    _graphics.drawCircle( 0, 0, _self.radius );
+    _graphics.endFill();
+    _graphics.cacheAsBitmap = true;
+    stage.addChild(_graphics);
+    return _graphics;
+  }
+
+    function generateParticles (stage) {
+        for (i = 0; i < 1000; i++) {
+            var radius = Math.ceil(Math.random() * 7);
+             var _p = new Particle({
+                    x: randomNumber(0, mainw),
+                    y: randomNumber(0, mainh),
+                    radius: radius,
+                  color: {
+                r: randomNumber(0, 140),
+                g: randomNumber(133, 198),
+                b: 255,
+                a: ((Math.random()*0.3)+0.7)
+              }
+                }, i, stage);
+            world.push(_p);
+        }
+    }
+
+    function addParticleTween ( _self, seed, dir ) {
+        var _x = mousex;
+    var _y = mousey;
+    var _a = 1;
+    var _ease = Power1.easeIn;
+    if ( dir < 0 ) {
+      _ease = Power1.easeOut;
+      _x = _self.config.x;
+      _y = _self.config.y;
+      _a = 0.2;
+    } else {
+      //var _angle = getAngleVector( Math.random(), 10 );
+      _self.config.x = _self.x+((Math.random()*100)-50);
+            _self.config.y = _self.y+((Math.random()*100)-50);
+    }
+        TweenMax.to(
+      _self,
+      1,
+      {
+        delay: seed*0.001,
+          x: _x,
+          y: _y,
+        fillAlpha: _a,
+        ease: _ease,
+        onComplete: addParticleTween,
+        onCompleteParams: [ _self, seed, dir*-1 ]
+        }
+    );
+    }
+
+  function getAngleVector (angle, dist) {
+     var _y = Math.sin(angle) * dist;
+     var _x = Math.cos(angle) * dist;
+    return [_x, _y];
+  }
+
+    TweenLite.ticker.addEventListener("tick", go);
+
+  var test = 0;
+  function go() {
+    for ( var i = 0, len = world.length; i < len; i++ ) {
+      world[i].draw();
+    }
+    if ( test < 10 ) {
+        console.log( world[0] );
+      test++;
+    }
+
+    renderer.render(stage);
+  }
+
+  generateParticles(stage);
+});
+//==============================================================================
+//                                     END
+//==============================================================================
+
+    </script>
+
+</body>
+
+</html>

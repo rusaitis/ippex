@@ -1,0 +1,91 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>PIXI DEMO</title>
+    <style>
+        html,body{
+            margin:0;
+            padding:0;
+          min-height: 1000px;
+          height:100%;
+            width:100%;
+        }
+        #container, #container canvas {
+            margin:0;
+            padding:0;
+            height:100%;
+            width:100%;
+            display:block;
+        }
+    </style>
+    <link rel="stylesheet" href="../bower_components/katex/dist/katex.min.css">
+    <script src="../bower_components/katex/dist/katex.min.js"></script>
+</head>
+
+<body>
+
+    <div id="container"></div>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/pixi.js/1.5.3/pixi.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.12.1/TweenMax.min.js"></script>
+    <!-- // <script src="../js/jquery-2.1.3.min.js"></script> -->
+    <script src="../bower_components/pixi/bin/pixi.min.js"></script>
+    <!-- // <script src="js/jquery.mobile-1.4.5.min.js"></script> -->
+    <!-- // <script src="../js/konva.min.js"></script> -->
+    <script src="../js/ui.js"></script>
+    <!-- // <script src="../js/math.js"></script> -->
+    <!-- // <script src="js/ui.js"></script> -->
+    <!-- // <script src="js/slider.js"></script> -->
+    <!-- // <script src="js/button.js"></script> -->
+    <script defer="defer">
+
+//==============================================================================
+//                                  PARAMETERS
+//==============================================================================
+    // You can use either `new PIXI.WebGLRenderer`, `new PIXI.CanvasRenderer`, or `PIXI.autoDetectRenderer`
+    // which will try to choose the best renderer for the environment you are in.
+    var renderer = new PIXI.WebGLRenderer(width, height);
+
+    // The renderer will create a canvas element for you that you can then insert into the DOM.
+    document.body.appendChild(renderer.view);
+
+    // You need to create a root container that will hold the scene you want to draw.
+    var stage = new PIXI.Container();
+
+    // This creates a texture from a 'bunny.png' image.
+    var bunnyTexture = PIXI.Texture.fromImage('./galaxy.png');
+    var bunny = new PIXI.Sprite(bunnyTexture);
+
+    // Setup the position and scale of the bunny
+    bunny.position.x = width/2;
+    bunny.position.y = height/2;
+
+    bunny.scale.x = 2;
+    bunny.scale.y = 2;
+
+    // Add the bunny to the scene we are building.
+    stage.addChild(bunny);
+
+    // kick off the animation loop (defined below)
+    animate();
+
+    function animate() {
+        // start the timer for the next animation loop
+        requestAnimationFrame(animate);
+
+        // each frame we spin the bunny around a bit
+        bunny.rotation += 0.03;
+
+        // this is the main render call that makes pixi draw your container and its children.
+        renderer.render(stage);
+    }
+//==============================================================================
+//                                     END
+//==============================================================================
+
+    </script>
+
+</body>
+
+</html>

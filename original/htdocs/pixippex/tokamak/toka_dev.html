@@ -1,0 +1,997 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>IPPEX</title>
+    <link rel="stylesheet" href="./toka.css">
+    <link rel="stylesheet" href="../bower_components/katex/dist/katex.min.css">
+    <script src="../bower_components/katex/dist/katex.min.js"></script>
+    <script src="../bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="../bower_components/pixi/bin/pixi.min.js"></script>
+    <script src="../bower_components/pixi/bin/pixi.min.js"></script>
+    <script src="../bower_components/dat.gui/dat.gui.js"></script>
+    <script src="../bower_components/stats.js/build/stats.min.js"></script>
+    <script src="../bower_components/jquery/dist/jquery.min.js"></script>
+    <!--<script src="../tink/bin/tink.js"></script>-->
+    <script src="../PIXI.draggable/bin/pixi.draggable.js"></script>
+    <!--<script src="../sound.js/sound.js"></script>-->
+    <script src="../howler.js/howler.js"></script>
+    <script src="../libs/util/TweenMax.min.js"></script>
+    <script src="../libs/kinematica/ui.js"></script>
+    <script src="./toka_physics_dev.js"></script>
+    <script src="./functions_dev.js"></script>
+    <script src="./Ziggurat.js"></script>
+</head>
+
+<body>
+    <div align="center">
+        <canvas id="game-canvas" width="1010" height="600"></canvas>
+    </div>
+    <div id="temperature" class="title" style="font-size : 1px; position: absolute; top: 475px; left: 230px; color: #89ff8f; width:500px">
+    </div>
+
+
+    <script defer>
+
+    //Parameters
+
+
+    var scaleTorus = 120;
+    var epsi = rmin/rmaj;
+    // var epsi = 0.8;
+    var rad = 0.15;
+    var introPlayed = false;
+    var Torus = {R:scaleTorus, r:scaleTorus * epsi};
+    var Machine = {sol:Torus.R/5 , diam: 2*(Torus.R + Torus.r + Torus.R/5)};
+    console.log("Machine diameter: " + Machine.diam);
+    var Plasma = {v: 1, wSpread: 0.5/1000, T: 10000};
+    var ext = {
+        dens : {
+            value : 1,
+            min : 0.1,
+            max : 10
+        },
+        mag : {
+            value : 3,
+            min : 1,
+            max : 14
+        },
+        aux : {
+            value : 0,
+            min : 0,
+            max : 10
+        }
+    };
+    var count = 0;
+    var torCenter = {x : 550 , y : 250};
+    var zig = new Ziggurat();
+    var showFields
+    var antennaLength = 100;
+    var coils = [];
+    var glowcoils = [];
+    var finalTemp = 0;
+    var stateVar = {
+        plasmaon : false,
+        justexploded : true,
+        mute : true,
+        bisec : true,
+        endonce : true,
+        lastDisruptionStart : false
+    };
+    var buttonState = {
+        mute : false,
+        bisec : true
+    };
+    var lastmag = 0;
+    var lastdens = 0;
+    var lastaux = 0;
+    var disruptions = 0;
+    var maxDisruptions = 5;
+
+
+
+    //PIXI start
+
+    var stage = new PIXI.Container(),
+        renderer = PIXI.autoDetectRenderer(1010,600,{
+            view : document.getElementById("game-canvas"),
+            antialiasing : false,
+            transparent : false,
+            resolution : 1}
+            );
+    var interactionManager = new PIXI.interaction.InteractionManager(renderer, {});
+    var dragAndDropManager = new PIXI.DragAndDropManager(interactionManager);
+
+    stage.interactive = true;
+
+    var gameContainer = new PIXI.Container();
+    var background = new PIXI.Container();
+    var underLay = new PIXI.Container();
+    var container = new PIXI.Container();
+    var rfContainer = new PIXI.Container();
+    var overLayGlow = new PIXI.Container();
+    var overLay = new PIXI.Container();
+    var controls = new PIXI.Container();
+    var endContainer = new PIXI.Container();
+
+    stage.addChild(gameContainer);
+    gameContainer.addChild(background);
+    gameContainer.addChild(underLay);
+    gameContainer.addChild(container);
+    gameContainer.addChild(rfContainer);
+    gameContainer.addChild(overLayGlow);
+    gameContainer.addChild(overLay);
+    gameContainer.addChild(controls);
+    stage.addChild(endContainer)
+
+
+
+    var state = play;
+
+
+    var loader = PIXI.loader;
+    loader
+        .add([
+        "img/ippexSprites.json"
+        ])
+        .on("progress", loadProgressHandler)
+        .load(setup);
+
+
+
+    function setup() {
+        // t = new Tink(PIXI, renderer.view);
+        // pointer = t.makePointer();
+        id = loader.resources["img/ippexSprites.json"].textures;
+
+                //Load the sounds
+        // sounds.load([
+        //   "../sound.js/sounds/shoot.wav", 
+        //   "../sound.js/sounds/music.wav",
+        //   "../sound.js/sounds/explosion.wav",
+        //   "../sound.js/sounds/wilhelm.wav"
+        // ]);
+
+        // //Assign the callback function that should run
+        // //when the sounds have loaded
+        // sounds.whenLoaded = soundSetup;
+
+        points = [];
+        var pointCurve = [];
+        var graphPoints = 1000;
+        for (var j = 0; j < graphPoints; j++)
+        {
+            var phi = 2 * Math.PI * ThetaMax / graphPoints * j;
+            var r = plasmaPath(phi, 0, epsi) * Torus.R;
+            var size = plasmaPathScale(phi, 0);
+            pointCurve.push({x: torCenter.x + r * Math.cos(phi), y: torCenter.y + r * Math.sin(phi), size: size});
+        }
+
+        points.push(pointCurve);
+
+        outerWall = new PIXI.Sprite(id["outerWall.png"]);
+        outerWall.anchor.set(0.5,0.5);
+        outerWall.width = Machine.diam;
+        outerWall.height = Machine.diam;
+        outerWall.position.set(torCenter.x,torCenter.y);
+        background.addChild(outerWall);
+
+        outerWallDanger = new PIXI.Sprite(id["outerWallDanger.png"]);
+        outerWallDanger.anchor.set(0.5,0.5);
+        outerWallDanger.width = Machine.diam;
+        outerWallDanger.height = Machine.diam;
+        outerWallDanger.position.set(torCenter.x,torCenter.y);
+        background.addChild(outerWallDanger);
+        outerWallDanger.alpha = 0;
+
+        innerWall = new PIXI.Sprite(id["innerWall.png"]);
+        innerWall.anchor.set(0.5,0.5);
+        innerWall.width = 2 * (Torus.R - Torus.r) - 2 * Machine.sol;
+        innerWall.height = 2 * (Torus.R - Torus.r) - 2 * Machine.sol;
+        console.log(innerWall.height);
+        innerWall.position.set(torCenter.x,torCenter.y);
+        background.addChild(innerWall);
+
+        innerWallDanger = new PIXI.Sprite(id["innerWallDanger.png"]);
+        innerWallDanger.anchor.set(0.5,0.5);
+        innerWallDanger.width = 2 * (Torus.R - Torus.r) - 2 * Machine.sol;
+        innerWallDanger.height = 2 * (Torus.R - Torus.r) - 2 * Machine.sol;
+        console.log(innerWallDanger.height);
+        innerWallDanger.position.set(torCenter.x,torCenter.y);
+        background.addChild(innerWallDanger);
+        innerWallDanger.alpha = 0;
+
+        for (var i = 0; i < 4; i++) {
+            var sign1 = Math.pow(-1,Math.floor(i/2));
+            var sign2 = Math.pow(-1,Math.floor((i+1)/2));
+            coil = new PIXI.Sprite(id["coils.png"]);
+            coil.anchor.set(0.5,0.5);
+            coil.scale.set(0.35,0.35);
+            coil.position.x = torCenter.x + sign1*Torus.r*2.4;
+            coil.position.y = torCenter.y + sign2*Torus.r*2.4;
+            coil.rotation = sign2*sign1*Math.PI/4
+            overLay.addChild(coil);
+            coils.push(coil);
+
+            glowcoil = new PIXI.Sprite(id["glowcoil.png"]);
+            glowcoil.anchor.set(0.5,0.5);
+            glowcoil.scale.set(0.35,0.45);
+            glowcoil.position.x = torCenter.x + sign1*Torus.r*2.4;
+            glowcoil.position.y = torCenter.y + sign2*Torus.r*2.4;
+            glowcoil.rotation = sign2*sign1*Math.PI/4
+            overLayGlow.addChild(glowcoil);
+            glowcoils.push(glowcoil);  
+        }
+
+        antenna2 = new PIXI.Graphics();
+        antenna2.beginFill(0x8bc5ff, 0.4);
+        // antenna2.moveTo(torCenter.x+Math.cos(0.25)*Machine.diam/2,torCenter.y+Math.sin(0.25)*Machine.diam/2);
+        // antenna2.lineStyle(2,0x7e7e7e7e);
+        antenna2.arc(torCenter.x , torCenter.y , Machine.diam/2 , Math.PI - rad , Math.PI + rad);
+        antenna2.lineTo(torCenter.x-Math.cos(rad)*Machine.diam/2-antennaLength,torCenter.y-Math.sin(rad)*Machine.diam/2);
+        antenna2.lineTo(torCenter.x-Math.cos(rad)*Machine.diam/2-antennaLength,torCenter.y+Math.sin(rad)*Machine.diam/2);
+        antenna2.lineTo(torCenter.x-Math.cos(rad)*Machine.diam/2,torCenter.y+Math.sin(rad)*Machine.diam/2);
+
+        // antenna2.drawRect(550,torCenter.y-50,100,100);
+        stage.addChild(antenna2);
+
+        antenna = new PIXI.Sprite(id["antenna.png"]);
+        antenna.anchor.set(0.5,0.5);
+        antenna.scale.set(0.5,0.7);
+        antenna.position.set(torCenter.x+205,torCenter.y);
+        // stage.addChild(antenna);
+
+        wave = new PIXI.Sprite(id["rfwave2.png"]);
+        wave.anchor.set(0.5,0.5);
+        wave.scale.set(1,Math.sin(rad)*Machine.diam/110);
+        wave.position.set(torCenter.x-230,torCenter.y);
+        rfContainer.addChild(wave);
+
+        // elbow = new PIXI.Sprite(id["elbow.png"]);
+        // elbow.anchor.set(0,0.42);
+        // elbow.scale.set(2.2,2.2);
+        // elbow.position.set(torCenter.x+230,torCenter.y);
+        // overLay.addChild(elbow);
+
+
+        antennaPurple = new PIXI.Sprite(id["antennaPurple.png"]);
+        antennaPurple.anchor.set(0.5,0.5);
+        antennaPurple.scale.set(-1,Math.sin(rad)*Machine.diam/110);
+        antennaPurple.position.set(torCenter.x-230,torCenter.y);
+        rfContainer.addChild(antennaPurple);
+        // rfContainer.addChild(antenna);
+        // stage.addChild(wave);
+
+        rfContainer.mask = antenna2;
+
+
+
+        for (var i = 0; i < totalDudes; i++)
+
+        {
+            var angle = Math.random() * 2 * Math.PI * ThetaMax;
+            var phase = Math.random() * 2 * Math.PI;
+            var dude = new PIXI.Sprite(id["particle.png"]);
+
+
+            dude.group = (Math.cos(angle) > Math.cos(Math.PI/8)) ? 1 : 0;
+            if (angle < 1 * Math.PI) dude.label = 'batch';
+            dude.anchor.set(0.5,0.5)
+            // dude.scale.set(0.5,0.5);
+            // dude.width = 10;
+            // dude.length = 10;
+            dude.R = 0;
+            dude.position.x = 100;
+            dude.position.y = 100;
+            dude.phi = 0;
+            dude.phiRun = 0;
+            dude.phiStart = angle;
+            dude.phase = phase;
+            // dude.phase = 0;
+            // dude.phiBias = rand;
+            dude.displ = {};
+            // dude.displ.x = (Math.random()-1) * 30;
+            // dude.displ.y = (Math.random()-1) * 30;
+            dude.displ.x = getRandomReal(-1,1) * ParticleSpread;
+            dude.displ.y = getRandomReal(-1,1) * ParticleSpread;
+
+            dude.oldPos = {};
+            dude.oldPos.x = 0;
+            dude.oldPos.y = 0;
+            dude.newPos = {};
+            dude.newPos.x = 0;
+            dude.newPos.y = 0;
+            // dude.mPerp = 0;
+            dude.speed = zig.nextGaussian();
+            // dude.speed = 1;
+            aliens.push(dude);
+
+            container.addChild(dude);
+        }
+
+        // test = new PIXI.Graphics();
+        // test.lineStyle(1,0xFFFFFF);
+        // test.drawRect(torCenter.x-100/2,torCenter.y-100/2,100,100);
+        // container.addChild(test);
+        //Control positions and sizes
+
+
+        contPos = {
+            box : {
+                pos : [20,460],
+                anchor : [0,0],
+                size : [970,140]
+            },
+            textBot : 35,
+            numFromText : 70,
+            unitsFromNum : 20,
+            slidersLeft : 20,
+            slidersTop : 60,
+            slidersSpace : 25,
+            arrowWidth : 15,
+            arrowHeight : 20,
+            arrowLength : 120,
+            arrowThick : 5,
+            buttonWidth : 10,
+            buttonHeight : 30,
+            buffer : 5,
+            outputLeft : 630,
+            outputRight : 930,
+            tempBot : 40,
+            elecBot : 75,
+            scoreBot : 130
+        };
+        contPos.slidersTot = 2 * contPos.arrowWidth + contPos.arrowLength;
+
+        contPos.sliderBoxLength = contPos.arrowLength -  2 * contPos.buffer;
+        contPos.sliderRange = contPos.sliderBoxLength - contPos.buttonWidth;
+        contPos.densSlider = {
+            pos : [contPos.box.pos[0] + contPos.slidersLeft , contPos.box.pos[1] + contPos.slidersTop]
+        };        
+        contPos.densText = {
+            pos : [contPos.densSlider.pos[0] + 0.5 * contPos.slidersTot , contPos.box.pos[1] + contPos.textBot]
+        };
+        contPos.auxSlider = {
+            pos : [contPos.densSlider.pos[0] + contPos.slidersTot + contPos.slidersSpace , contPos.box.pos[1] + contPos.slidersTop]
+        };
+        contPos.auxText = {
+            pos : [contPos.auxSlider.pos[0] + 0.5 * contPos.slidersTot, contPos.box.pos[1] + contPos.textBot]
+        };
+        contPos.magSlider = {
+            pos : [contPos.auxSlider.pos[0] + contPos.slidersTot + contPos.slidersSpace , contPos.box.pos[1] + contPos.slidersTop]
+        };
+        contPos.magText = {
+            pos : [contPos.magSlider.pos[0] + 0.5 * contPos.slidersTot , contPos.box.pos[1] + contPos.textBot]
+        };
+        
+
+
+
+
+
+        controlBox = new PIXI.Graphics();
+        controlBox.lineStyle(0, 0x0a2332);
+        controlBox.beginFill(0x0a2332);
+        controlBox.drawRoundedRect(contPos.box.pos[0] , contPos.box.pos[1] , contPos.box.size[0] , contPos.box.size[1],5);
+        controlBox.endFill();
+        controlBox.alpha = 0.8;
+        controls.addChild(controlBox);
+
+
+        densSliderLeft = new PIXI.Sprite(id["greenArrowLeft.png"]);
+        densSliderLeft.anchor.set(0,0.5);
+        densSliderLeft.width = contPos.arrowWidth;
+        densSliderLeft.height = contPos.arrowHeight;
+        densSliderLeft.position.x = contPos.densSlider.pos[0];
+        densSliderLeft.position.y = contPos.densSlider.pos[1];
+        controls.addChild(densSliderLeft);
+
+
+        densSliderLine = new PIXI.Sprite(id["greenArrowLine.png"]);
+        densSliderLine.anchor.set(0,0.5);
+        densSliderLine.width = contPos.arrowLength;
+        densSliderLine.height = contPos.arrowThick;
+        densSliderLine.position.x = contPos.densSlider.pos[0] + contPos.arrowWidth;
+        densSliderLine.position.y = contPos.densSlider.pos[1];
+        controls.addChild(densSliderLine);
+
+        densSliderRight = new PIXI.Sprite(id["greenArrowRight.png"]);
+        densSliderRight.anchor.set(0,0.5);
+        densSliderRight.width = contPos.arrowWidth;
+        densSliderRight.height = contPos.arrowHeight;
+        densSliderRight.position.x = contPos.densSlider.pos[0] + contPos.arrowLength + contPos.arrowWidth;
+        densSliderRight.position.y = contPos.densSlider.pos[1];
+        controls.addChild(densSliderRight);
+
+        densBut = new PIXI.Sprite(id["blackSlide.png"]);
+        densBut.anchor.set(0,0.5);
+        densBut.width = contPos.buttonWidth;
+        densBut.height = contPos.buttonHeight;
+        densBut.position.x = contPos.densSlider.pos[0] + contPos.arrowWidth + contPos.buffer;
+        densBut.position.y = contPos.densSlider.pos[1];
+        controls.addChild(densBut);
+
+        densBut.buttonMode = true;
+        densBut.on('mouseover',overfun);
+
+        densButBox = new PIXI.Graphics();
+        // densButBox.lineStyle(2);
+        densButBox.drawRect(contPos.densSlider.pos[0] + contPos.arrowWidth + contPos.buffer, contPos.densSlider.pos[1] - contPos.buttonHeight/2 , contPos.sliderBoxLength, contPos.buttonHeight);
+        controls.addChild(densButBox);
+        densBut.draggable({manager: dragAndDropManager, containment : densButBox , cursor : "pointer" , axis : "x"});
+
+        densText = new PIXI.Text("Density:");
+        densText.style = {fill:"white", font:"20px courier"};
+        // densText.text = "Density: ";
+        densText.anchor.set(0.5,1);
+        densText.position.set(contPos.densText.pos[0],contPos.densText.pos[1]);
+        controls.addChild(densText);
+
+        densNum = new PIXI.Text("00.00");
+        densNum.style = {fill:"white", font:"20px calibri"};
+        // densNum.text = "Density: ";
+        densNum.anchor.set(0.5,1);
+        densNum.position.set(contPos.densText.pos[0],contPos.densText.pos[1]+contPos.numFromText);
+        controls.addChild(densNum);
+
+        densUnits = new PIXI.Text("m^(-3)");
+        densUnits.style = {fill:"white", font:"20px calibri"};
+        // densUnits.text = "Density: ";
+        densUnits.anchor.set(0.5,1);
+        densUnits.position.set(contPos.densText.pos[0],contPos.densText.pos[1]+contPos.numFromText+contPos.unitsFromNum);
+        controls.addChild(densUnits);
+
+
+        auxSliderLeft = new PIXI.Sprite(id["purpleArrowLeft.png"]);
+        auxSliderLeft.anchor.set(0,0.5);
+        auxSliderLeft.width = contPos.arrowWidth;
+        auxSliderLeft.height = contPos.arrowHeight;
+        auxSliderLeft.position.x = contPos.auxSlider.pos[0];
+        auxSliderLeft.position.y = contPos.auxSlider.pos[1];
+        controls.addChild(auxSliderLeft);
+
+
+        auxSliderLine = new PIXI.Sprite(id["purpleArrowLine.png"]);
+        auxSliderLine.anchor.set(0,0.5);
+        auxSliderLine.width = contPos.arrowLength;
+        auxSliderLine.height = contPos.arrowThick;
+        auxSliderLine.position.x = contPos.auxSlider.pos[0] + contPos.arrowWidth;
+        auxSliderLine.position.y = contPos.auxSlider.pos[1];
+        controls.addChild(auxSliderLine);
+
+        auxSliderRight = new PIXI.Sprite(id["purpleArrowRight.png"]);
+        auxSliderRight.anchor.set(0,0.5);
+        auxSliderRight.width = contPos.arrowWidth;
+        auxSliderRight.height = contPos.arrowHeight;
+        auxSliderRight.position.x = contPos.auxSlider.pos[0] + contPos.arrowLength + contPos.arrowWidth;
+        auxSliderRight.position.y = contPos.auxSlider.pos[1];
+        controls.addChild(auxSliderRight);
+
+        auxBut = new PIXI.Sprite(id["blackSlide.png"]);
+        auxBut.anchor.set(0,0.5);
+        auxBut.width = contPos.buttonWidth;
+        auxBut.height = contPos.buttonHeight;
+        auxBut.position.x = contPos.auxSlider.pos[0] + contPos.arrowWidth + contPos.buffer;
+        auxBut.position.y = contPos.auxSlider.pos[1];
+        controls.addChild(auxBut);
+
+        auxBut.buttonMode = true;
+        auxBut.on('mouseover',overfun);
+
+        auxButBox = new PIXI.Graphics();
+        // auxButBox.lineStyle(2);
+        auxButBox.drawRect(contPos.auxSlider.pos[0] + contPos.arrowWidth + contPos.buffer, contPos.auxSlider.pos[1] - contPos.buttonHeight/2 , contPos.sliderBoxLength, contPos.buttonHeight);
+        controls.addChild(auxButBox);
+        auxBut.draggable({manager: dragAndDropManager, containment : auxButBox , cursor : "pointer" , axis : "x"});
+
+        auxText = new PIXI.Text("Auxiliary Power:");
+        auxText.style = {fill:"white", font:"20px calibri"};
+        // auxText.text = "Density: ";
+        auxText.anchor.set(0.5,1);
+        auxText.position.set(contPos.auxText.pos[0],contPos.auxText.pos[1]);
+        controls.addChild(auxText);
+
+        auxNum = new PIXI.Text("00.00");
+        auxNum.style = {fill:"white", font:"20px calibri"};
+        // auxNum.text = "Density: ";
+        auxNum.anchor.set(0.5,1);
+        auxNum.position.set(contPos.auxText.pos[0],contPos.auxText.pos[1]+contPos.numFromText);
+        controls.addChild(auxNum);
+
+        auxUnits = new PIXI.Text("MW");
+        auxUnits.style = {fill:"white", font:"20px calibri"};
+        // auxUnits.text = "Density: ";
+        auxUnits.anchor.set(0.5,1);
+        auxUnits.position.set(contPos.auxText.pos[0],contPos.auxText.pos[1]+contPos.numFromText+contPos.unitsFromNum);
+        controls.addChild(auxUnits);
+
+
+
+
+
+        magSliderLeft = new PIXI.Sprite(id["blueArrowLeft.png"]);
+        magSliderLeft.anchor.set(0,0.5);
+        magSliderLeft.width = contPos.arrowWidth;
+        magSliderLeft.height = contPos.arrowHeight;
+        magSliderLeft.position.x = contPos.magSlider.pos[0];
+        magSliderLeft.position.y = contPos.magSlider.pos[1];
+        controls.addChild(magSliderLeft);
+
+
+        magSliderLine = new PIXI.Sprite(id["blueArrowLine.png"]);
+        magSliderLine.anchor.set(0,0.5);
+        magSliderLine.width = contPos.arrowLength;
+        magSliderLine.height = contPos.arrowThick;
+        magSliderLine.position.x = contPos.magSlider.pos[0] + contPos.arrowWidth;
+        magSliderLine.position.y = contPos.magSlider.pos[1];
+        controls.addChild(magSliderLine);
+
+        magSliderRight = new PIXI.Sprite(id["blueArrowRight.png"]);
+        magSliderRight.anchor.set(0,0.5);
+        magSliderRight.width = contPos.arrowWidth;
+        magSliderRight.height = contPos.arrowHeight;
+        magSliderRight.position.x = contPos.magSlider.pos[0] + contPos.arrowLength + contPos.arrowWidth;
+        magSliderRight.position.y = contPos.magSlider.pos[1];
+        controls.addChild(magSliderRight);
+
+        magBut = new PIXI.Sprite(id["blackSlide.png"]);
+        magBut.anchor.set(0,0.5);
+        magBut.width = contPos.buttonWidth;
+        magBut.height = contPos.buttonHeight;
+        magBut.position.x = contPos.magSlider.pos[0] + contPos.arrowWidth + contPos.buffer;
+        magBut.position.y = contPos.magSlider.pos[1];
+        controls.addChild(magBut);
+
+        magBut.buttonMode = true;
+        magBut.on('mouseover',overfun);
+
+        magButBox = new PIXI.Graphics();
+        // magButBox.lineStyle(2);
+        magButBox.drawRect(contPos.magSlider.pos[0] + contPos.arrowWidth + contPos.buffer, contPos.magSlider.pos[1] - contPos.buttonHeight/2 , contPos.sliderBoxLength, contPos.buttonHeight);
+        controls.addChild(magButBox);
+        magBut.draggable({manager: dragAndDropManager, containment : magButBox , cursor : "pointer" , axis : "x"});
+
+        magText = new PIXI.Text("Magnetic Field:");
+        magText.style = {fill:"white", font:"20px calibri"};
+        // magText.text = "Density: ";
+        magText.anchor.set(0.5,1);
+        magText.position.set(contPos.magText.pos[0],contPos.magText.pos[1]);
+        controls.addChild(magText);
+
+        magNum = new PIXI.Text("00.00");
+        magNum.style = {fill:"white", font:"20px calibri"};
+        // magNum.text = "Density: ";
+        magNum.anchor.set(0.5,1);
+        magNum.position.set(contPos.magText.pos[0],contPos.magText.pos[1]+contPos.numFromText);
+        controls.addChild(magNum);
+
+        magUnits = new PIXI.Text("T");
+        magUnits.style = {fill:"white", font:"20px calibri"};
+        // magUnits.text = "Density: ";
+        magUnits.anchor.set(0.5,1);
+        magUnits.position.set(contPos.magText.pos[0],contPos.magText.pos[1]+contPos.numFromText+contPos.unitsFromNum);
+        controls.addChild(magUnits);
+
+
+
+
+
+        tempText = new PIXI.Text("Temperature:");
+        tempText.style = {fill:"white", font:"20px calibri"};
+        // tempText.text = "Density: ";
+        tempText.anchor.set(0,1);
+        tempText.position.set(contPos.box.pos[0] + contPos.outputLeft , contPos.box.pos[1] + contPos.tempBot);
+        controls.addChild(tempText);
+
+        elecText = new PIXI.Text("Electric Power:");
+        elecText.style = {fill:"white", font:"20px calibri"};
+        // elecText.text = "Density: ";
+        elecText.anchor.set(0,1);
+        elecText.position.set(contPos.box.pos[0] + contPos.outputLeft , contPos.box.pos[1] + contPos.elecBot);
+        controls.addChild(elecText);
+
+        scoreText = new PIXI.Text("Score:");
+        scoreText.style = {fill:"white", font:"40px calibri"};
+        // scoreText.text = "Density: ";
+        scoreText.anchor.set(0,1);
+        scoreText.position.set(contPos.box.pos[0] + contPos.outputLeft , contPos.box.pos[1] + contPos.scoreBot);
+        controls.addChild(scoreText);
+
+        tempNum = new PIXI.Text("");
+        tempNum.style = {fill:"white", font:"20px calibri"};
+        // tempNum.text = "Density: ";
+        tempNum.anchor.set(1,1);
+        tempNum.position.set(contPos.box.pos[0] + contPos.outputRight , contPos.box.pos[1] + contPos.tempBot);
+        controls.addChild(tempNum);
+
+        elecNum = new PIXI.Text("");
+        elecNum.style = {fill:"white", font:"20px calibri"};
+        // elecNum.text = "Density: ";
+        elecNum.anchor.set(1,1);
+        elecNum.position.set(contPos.box.pos[0] + contPos.outputRight , contPos.box.pos[1] + contPos.elecBot);
+        controls.addChild(elecNum);
+
+        scoreNum = new PIXI.Text("");
+        scoreNum.style = {fill:"white", font:"40px calibri"};
+        // scoreNum.text = "Density: ";
+        scoreNum.anchor.set(1,1);
+        scoreNum.position.set(contPos.box.pos[0] + contPos.outputRight , contPos.box.pos[1] + contPos.scoreBot);
+        controls.addChild(scoreNum);
+
+
+        infoPos = {
+            pos : [0,10],
+            anchor : [0,0],
+            size : [200,400]
+        }
+
+        infoBox = new PIXI.Graphics();
+        infoBox.lineStyle(0, 0x7e7e7e7e);
+        infoBox.beginFill(0x322850);
+        infoBox.drawRoundedRect(infoPos.pos[0],infoPos.pos[1],infoPos.size[0],infoPos.size[1],5);
+        infoBox.endFill();
+        infoBox.alpha = 0.5
+        controls.addChild(infoBox);
+
+        lifeBarPos = {
+            pos : [900,50],
+            barPos : 5,
+            barSize : [110,10]
+        }
+
+        lifeBarText = new PIXI.Text("Wall Health");
+        lifeBarText.style = {fill:"white", font:"20px calibri"};
+        lifeBarText.anchor.set(1,1);
+        lifeBarText.position.set(lifeBarPos.pos[0],lifeBarPos.pos[1]);
+        controls.addChild(lifeBarText);
+
+        lifeBar = new PIXI.Sprite(id["lifeBar.png"]);
+        lifeBar.anchor.set(1,0);
+        lifeBar.position.set(lifeBarPos.pos[0],lifeBarPos.pos[1] + lifeBarPos.barPos);
+        lifeBar.width = lifeBarPos.barSize[0];
+        lifeBar.height = lifeBarPos.barSize[1];
+        controls.addChild(lifeBar);
+
+        lifeBarShell = new PIXI.Sprite(id["lifeBarShell.png"]);
+        lifeBarShell.anchor.set(1,0);
+        lifeBarShell.position.set(lifeBarPos.pos[0],lifeBarPos.pos[1] + lifeBarPos.barPos);
+        lifeBarShell.width = lifeBarPos.barSize[0];
+        lifeBarShell.height = lifeBarPos.barSize[1];
+        controls.addChild(lifeBarShell);
+
+        lifeBarDanger = new PIXI.Sprite(id["lifeBarDanger.png"]);
+        lifeBarDanger.anchor.set(1,0);
+        lifeBarDanger.position.set(lifeBarPos.pos[0],lifeBarPos.pos[1] + lifeBarPos.barPos);
+        lifeBarDanger.width = lifeBarPos.barSize[0];
+        lifeBarDanger.height = lifeBarPos.barSize[1];
+        lifeBarDanger.alpha = 0;
+        controls.addChild(lifeBarDanger);
+
+
+
+
+
+
+
+
+
+        // console.log(500-densBut.width);
+
+        // auxSlider = new PIXI.Sprite(id["sliderSlide.png"]);
+        // auxSlider.anchor.set(0.5,0.5);
+        // auxSlider.scale.set(1,1);
+        // auxSlider.position.x = slidersLeft + slidersSpace;
+        // auxSlider.position.y = slidersTop;
+        // controls.addChild(auxSlider);
+
+        // auxBut = new PIXI.Sprite(id["sliderBut.png"]);
+        // auxBut.anchor.set(0.5,0.5);
+        // auxBut.scale.set(0.5,0.5);
+        // auxBut.position.x = (slidersLeft + slidersSpace - auxSlider.width/2) + (ext.aux.value - ext.aux.min)/(ext.aux.max - ext.aux.min)*auxSlider.width;
+        // auxBut.position.y = slidersTop;
+        // controls.addChild(auxBut);
+
+        // auxBut.buttonMode = true;
+        // auxBut.on('mouseover',overfun);
+
+        // auxButBox = new PIXI.Graphics();
+        // auxButBox.drawRect(auxSlider.x-auxSlider.width/2,auxBut.y-auxBut.height/2,auxSlider.width+auxBut.width/2,(auxBut.height));
+        // controls.addChild(auxButBox);
+        // auxBut.draggable({manager: dragAndDropManager, containment : auxButBox , cursor : "pointer" , axis : "x"});
+
+        // auxText = new PIXI.Text("");
+        // auxText.style = {fill:"white", font:"20px Helvetica"};;
+        // // densText.text = "Density: ";
+        // auxText.position.set(auxSlider.x -auxSlider.width/2,auxSlider.y - 50);
+        // controls.addChild(auxText);
+
+
+
+
+        // magSlider = new PIXI.Sprite(id["sliderSlide.png"]);
+        // magSlider.anchor.set(0.5,0.5);
+        // magSlider.scale.set(1,1);
+        // magSlider.position.x = slidersLeft + 2*slidersSpace;
+        // magSlider.position.y = slidersTop;
+        // controls.addChild(magSlider);
+
+        // magBut = new PIXI.Sprite(id["sliderBut.png"]);
+        // magBut.anchor.set(0.5,0.5);
+        // magBut.scale.set(0.5,0.5);
+        // magBut.position.x = (slidersLeft + 2*slidersSpace - magSlider.width/2) + (ext.mag.value - ext.mag.min)/(ext.mag.max - ext.mag.min)*magSlider.width;
+        // magBut.position.y = slidersTop;
+        // controls.addChild(magBut);
+
+        // magBut.buttonMode = true;
+        // magBut.on('mouseover',overfun);
+
+        // magButBox = new PIXI.Graphics();
+        // magButBox.drawRect(magSlider.x-magSlider.width/2,magBut.y-magBut.height/2,magSlider.width+magBut.width/2,(magBut.height));
+        // controls.addChild(magButBox);
+        // magBut.draggable({manager: dragAndDropManager, containment : magButBox , cursor : "pointer" , axis : "x"});
+
+        // magText = new PIXI.Text("");
+        // magText.style = {fill:"white", font:"20px Helvetica"};;
+        // // densText.text = "Density: ";
+        // magText.position.set(magSlider.x - magSlider.width/2,magSlider.y - 50);
+        // controls.addChild(magText);
+
+
+
+        // bisecBut = new PIXI.Sprite(id["buttonOff.png"]);
+        // bisecBut.anchor.set(0.5,0.5);
+        // bisecBut.scale.set(1,1);
+        // bisecBut.position.x = 870;
+        // bisecBut.position.y = 550;
+        // bisecBut.txt = "bisec";
+        // controls.addChild(bisecBut);
+
+        // bisecText = new PIXI.Text("Advanced Bisect");
+        // bisecText.style = {fill:"white", font:"20px Helvetica"};
+        // // bisecText.text = "Density: ";
+        // bisecText.position.set(845, 500);
+        // controls.addChild(bisecText);
+
+        // buttonize(bisecBut);
+
+
+        // t.makeDraggable(densBut, auxBut, magBut);
+
+
+
+
+
+        densLimitText = new PIXI.Text("Density Limit Reached!");
+        densLimitText.style = {fill:"red"};
+        densLimitText.anchor.set(0.5,0.5);
+        densLimitText.position.set(torCenter.x , torCenter.y - 15);
+        densLimitText.visible = true;
+        controls.addChild(densLimitText);
+
+        betaLimitText = new PIXI.Text("Beta Limit Reached!");
+        betaLimitText.style = {fill:"red"};
+        betaLimitText.anchor.set(0.5,0.5);
+        betaLimitText.position.set(torCenter.x , torCenter.y + 15);
+        betaLimitText.visible = true;
+        controls.addChild(betaLimitText);
+
+        muteBut = new PIXI.Sprite(id["audio.png"]);
+        muteBut.scale.set(0.1,0.1);
+        muteBut.anchor.set(0.5,0.5);
+        muteBut.position.set(800,100);
+        muteBut.txt = "mute";
+        controls.addChild(muteBut);
+
+        buttonize(muteBut);
+
+        running = new Howl({
+          urls: ['../sounds/running.wav'],
+          loop:true
+        });
+
+        turnon = new Howl({
+            urls : ['../sounds/turnon.mp3'],
+            volume : 0.4
+        });
+
+        explosion3 = new Howl({
+            urls : ['../sounds/explosion3.wav']
+        });
+
+        explosion = new Howl({
+            urls : ['../sounds/explosion.wav']
+        });
+
+        wilhelm = new Howl({
+            urls : ['../sounds/wilhelm.wav']
+        });    
+
+        alarm = new Howl({
+            urls : ['../sounds/alarm2.wav'],
+            loop : true,
+            volume : 0.1
+        });
+
+        endScreen = new PIXI.Sprite(id['death.jpg']);
+        endScreen.width = 1010;
+        endScreen.height = 600;
+        endContainer.visible = false;
+        endContainer.addChild(endScreen);
+
+        endText = new PIXI.Text("You've killed the reactor...\nAnd humanity\n\nI hope you're happy");
+        endText.style = {align:"center",font:"70px Helvetica"};
+        endText.position.set(100,200);
+        endContainer.addChild(endText);
+
+
+
+        gameLoop();
+        renderer.render(stage);
+    }
+
+    function play() {
+        ext.dens.value = (((densBut.x - contPos.densSlider.pos[0] - contPos.arrowWidth - contPos.buffer)/contPos.sliderRange)*(ext.dens.max-ext.dens.min) + ext.dens.min).toFixed(2);
+        ext.aux.value = (((auxBut.x - contPos.auxSlider.pos[0] - contPos.arrowWidth - contPos.buffer)/contPos.sliderRange)*(ext.aux.max-ext.aux.min) + ext.aux.min).toFixed(2);
+        ext.mag.value = (((magBut.x - contPos.magSlider.pos[0] - contPos.arrowWidth - contPos.buffer)/contPos.sliderRange)*(ext.mag.max-ext.mag.min) + ext.mag.min).toFixed(2);
+
+
+
+        magVal = ext.mag.value;
+        densVal = ext.dens.value;
+        powVal = ext.aux.value;
+
+
+        
+
+        if (count % 2 < 0.1 || count == 0) {
+            finalTemp = bisectionAdvanced();
+            finalOut = calcScore(finalTemp);
+            if (finalOut.betalimited || finalOut.densitylimited) {  //Plasma is off because of limits
+                stateVar.plasmaon = false;
+                // finalOut.tempkev = 0;
+                if (!stateVar.justexploded) {
+                    stateVar.justexploded = true;
+                    explosion3.play();
+                    turnon.stop();
+                    running.stop();
+                    disruptions += 1;
+                    if (disruptions >= maxDisruptions) state = endgame;
+                }
+            } else {
+                if (stateVar.justexploded) {
+                    turnon.play()
+                    running.play();
+                
+                }
+                stateVar.plasmaon = true;
+                stateVar.justexploded = false;
+                // running.play();
+            }
+            // shoot.play();
+            // if (justexploded) {
+            //     // alert("justexploded");
+            //     // shoot.play();
+            // }
+
+        }
+        if (stateVar.plasmaon) {
+            lastdens = densVal;
+            lastaux = powVal;
+            lastmag = magVal;
+        }
+
+        tempNum.text = finalOut.tempkev.toFixed(3) + " keV";
+        elecNum.text = (finalOut.P_elec*1.e-6).toFixed(3) + " MW";
+        scoreNum.text = finalOut.score.toFixed(3);
+        if (finalOut.P_elec < 0) elecNum.style.fill = "red"; else elecNum.style.fill = "white";
+
+
+        if (finalOut.betalimited) {
+            betaLimitText.visible = true;
+            // console.log("true");
+            } else betaLimitText.visible = false;
+        if (finalOut.densitylimited) densLimitText.visible = true; else densLimitText.visible = false;
+
+        densNum.text = ext.dens.value;
+        auxNum.text = ext.aux.value;
+        magNum.text = ext.mag.value;
+        // console.log(ext.mag.value)
+
+
+
+        waveMove = (count % 6) *5 ;
+        wave.position.x =  torCenter.x - 205 + waveMove;
+        // if (playButton.state == "down") shoot.play();
+        // iterate through the dudes and update their position
+        // finalTemp = "Here";
+        // $("#temperature").html("TEMPERATURE:" +finalTemp);
+            // document.getElementById("temperature").value = ("TEMPERATURE: " + finalTemp);
+        for (var i = 0; i < aliens.length; i++)
+        {
+            var dude = aliens[i];
+            dude.rotation = dude.direction;
+
+            if (i > ext.dens.value*totalDudes/ext.dens.max || !(stateVar.plasmaon)) {
+                    dude.visible = false;
+                } else {
+                    dude.visible = true;
+                }
+
+
+            dude.phiRun += dude.speed * 0.2 * finalTemp/100;
+            dude.phi = dude.phiRun + dude.phiStart;
+            dude.R = Torus.R * plasmaPath(dude.phi, dude.phase, epsi);
+            dude.scale.set(0.3*plasmaPathScale(dude.phi, dude.phase));
+            dude.alpha = plasmaPathScale(dude.phi, Math.PI/8);
+
+            dude.newPos.x = Math.cos(dude.phi) * dude.R;
+            dude.newPos.y = Math.sin(dude.phi) * dude.R;
+            var m = (dude.newPos.y - dude.oldPos.y) / (dude.newPos.x - dude.oldPos.x);
+            var mPerp = - 1 / m;
+            mPerp = Math.abs(mPerp);
+            dude.mPerp = mPerp;
+            dude.m = m;
+
+            if (Math.tan(dude.phi) > 0) mPerp *= -1;
+            var norm = Math.sqrt(1/(1 + mPerp * mPerp));
+
+            dude.x = torCenter.x + Math.round(dude.newPos.x);
+            dude.y = torCenter.y + Math.round(dude.newPos.y);
+
+            dude.oldPos.x = dude.newPos.x;
+            dude.oldPos.y = dude.newPos.y;
+
+        }
+
+        overLayGlow.alpha = 0.5*magVal/ext.mag.max;
+        // overLayGlow.alpha = 1;
+        antennaPurple.alpha = 1 - powVal/ext.aux.max;
+
+        if (disruptions == maxDisruptions-1) {
+            outerWallDanger.alpha = 0.5 * (1 + Math.cos(count));
+            innerWallDanger.alpha = 0.5 * (1 + Math.cos(count));
+            lifeBarDanger.alpha = 0.5 * (1 + Math.cos(count));
+            if (!stateVar.lastDisruptionStart) {
+                alarm.play();
+                stateVar.lastDisruptionStart = true;
+            }
+        } else {
+            stateVar.lastDisruptionStart = false;
+        }
+
+        lifeBar.width = lifeBarPos.barSize[0] * (1/11 + 10/11 * (maxDisruptions - 1 - disruptions)/(maxDisruptions - 1));
+
+        muteBut.texture = (stateVar.mute) ? id["mute.png"] : id["audio.png"];
+        if (stateVar.mute) Howler.mute(); else Howler.unmute();
+
+        // bisecBut.texture = (stateVar.bisec) ? id["buttonOn.png"] : id["buttonOff.png"];
+
+        
+    }
+
+    function endgame() {
+        gameContainer.visible = false;
+        endContainer.visible = true;
+        if (stateVar.endonce) {
+            wilhelm.play();
+            explosion.play();
+        }
+        stateVar.endonce = false;
+    }
+
+    function gameLoop(){
+
+        requestAnimationFrame(gameLoop);
+        state();
+        renderer.render(stage);
+        count += 0.1;
+    }
+
+
+
+
+
+    </script>
+
+
+</body>

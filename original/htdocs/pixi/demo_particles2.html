@@ -1,0 +1,254 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>IPPEX</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000000;
+        }
+
+        .rendererView {
+            position: absolute;
+            display: block;
+            height: 100%;
+        }
+    </style>
+    <link rel="stylesheet" href="../bower_components/katex/dist/katex.min.css">
+    <script src="../bower_components/katex/dist/katex.min.js"></script>
+</head>
+
+<body>
+
+<div id="container"></div>
+<script src="../js/stats.min.js"></script>
+<script src="../js/dat.gui.min.js"></script>
+<!-- // <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> -->
+<!-- // <script src="//cdnjs.cloudflare.com/ajax/libs/pixi.js/1.5.3/pixi.js"></script> -->
+<script src="../js/TweenMax.min.js"></script>
+<script src="../js/jquery-2.1.3.min.js"></script>
+<script src="../bower_components/pixi/bin/pixi.min.js"></script>
+<!-- // <script src="js/jquery.mobile-1.4.5.min.js"></script> -->
+<!-- // <script src="../js/konva.min.js"></script> -->
+<script src="../js/ui.js"></script>
+<!-- // <script src="../js/math.js"></script> -->
+<!-- // <script src="js/ui.js"></script> -->
+<!-- // <script src="js/slider.js"></script> -->
+<!-- // <script src="js/button.js"></script> -->
+<script src="toka.js"></script>
+<script defer="defer">
+
+//*****Physics constants and variables*************
+
+var K_BOLT = 1.6021e-16; // Boltzmann's constant
+var MU_0 = 4.0e-7 * Math.PI;  // Permittivity
+var E_ALPHA_0 = 3.5e3;        // Alpha energy (keV)
+
+var elon= 2.0;
+var zEff = 1.65;       // Z-effective
+var zImp = 6.0;        // Z of dominant impurity
+var rnDnDT = 0.5;      // deuterium / (deuterium + tritium) ratio
+var cTau = 1.80;       // Confinement enhancement multiplier
+var tauPHe = 15.;      // Helium ash particle confinement time (seconds)
+var rmin = 0.795;
+var rmaj = 2.59;
+var q = 2.3;
+var Nhe = 0; //Helium ash
+var cAsh = 0; //Helium ash coefficient
+
+var area = Math.PI*rmin*rmin*elon;
+var volume = 2*Math.PI*rmaj*area;
+
+var b_c_ratio = q * 1.e6 * MU_0 * rmaj / (Math.PI * rmin*rmin * (1. + elon*elon));
+
+//************Programatic variables***********
+
+var finalOut = {};
+var finalTemp = 0;
+var finalScore = 0;
+var magVal = 14;
+var densVal = 2.5;
+var powVal = 0.19;
+var magMax = 20;
+var densMax = 10;
+var powMax = 10;
+var yAll = 300;
+var yAllMin = 20;
+var dY = yAll - yAllMin;
+var magPos = yAll-(magVal/magMax)*dY;
+var densPos = yAll-(densVal/densMax)*dY;
+var powPos = yAll-(powVal/powMax)*dY;
+
+//==============================================================================
+//                                  START
+//==============================================================================
+
+var Params = function() {
+  this.scale = 1;
+  this.tscale = 1;
+  this.focus = 0;
+  this.T = 10000;
+};
+
+var Torus = {R:200, r:100};
+var Plasma = {w: 1/100, wSpread: 0.5/1000, T: 10000};
+var params = new Params();
+var gui = new dat.GUI();
+gui.add(params, 'scale', 0.1, 10);
+gui.add(params, 'tscale', 0.1, 10);
+gui.add(params, 'focus', 0, 1);
+gui.add(params, 'T', 1000, 1000000);
+
+// stats
+var stats = new Stats();
+stats.domElement.style.position = 'absolute';
+stats.domElement.style.left = '0px';
+stats.domElement.style.top = '0px';
+document.body.appendChild( stats.domElement );
+
+// PIXI
+
+// ///////////////////////////////////////////////////////////
+// Particle
+// ///////////////////////////////////////////////////////////
+var Particle = function(stageConfig, particleConfig) {
+  this.stageConfig = stageConfig;
+  this.particleConfig = particleConfig;
+};
+
+var pProto = Particle.prototype;
+
+pProto.draw = function() {
+  // if (this.particleConfig.w > 0)  this.stageConfig.context.fillStyle = "#FEF1C4"
+      // else this.stageConfig.context.fillStyle = "#7ea3fe";
+  var temp = Math.random() * 255;
+  var r = Math.floor(temp);
+  var g = Math.floor(20);
+  var b = Math.floor(temp);
+  var colour = rgbToHex(r,g,b);
+  // this.stageConfig.context.fillStyle = "#FEF1C4";
+  this.stageConfig.context.fillStyle = String(colour);
+  this.stageConfig.context.shadowColor = "white";
+  // this.stageConfig.context.shadowBlur = 2;
+  // this.stageConfig.context.tint = Math.random() * 0xFFFFFF;
+  // this.stageConfig.context.fillStyle = "#FEF1C4";
+  this.stageConfig.context.beginPath();
+  this.stageConfig.context.arc(this.particleConfig.x, this.particleConfig.y, this.particleConfig.r, 0, Math.PI * 2, false);
+  this.stageConfig.context.fill();
+};
+
+// ///////////////////////////////////////////////////////////
+// ParticlesView
+// ///////////////////////////////////////////////////////////
+var ParticlesView = function() {
+  this.init();
+};
+
+var proto = ParticlesView.prototype;
+
+proto.init = function() {
+  this
+    .setupHandlers()
+    .layout()
+    .createParticls()
+    .render();
+};
+
+proto.setupHandlers = function() {
+  this.renderHandler = this.render.bind(this);
+
+  return this;
+};
+
+proto.layout = function() {
+  var stage = document.createElement('canvas');
+  stage.width = window.innerWidth;
+  stage.height = window.innerHeight;
+  var context = stage.getContext('2d');
+  var centerX = stage.width / 2;
+  var centerY = stage.height / 2;
+
+  this.stageConfig = {
+    stage: stage,
+    context: context,
+    centerX: centerX,
+    centerY: centerY
+  };
+
+  document.body.appendChild(this.stageConfig.stage);
+  this.particleStore = [];
+
+  return this;
+};
+
+proto.createParticls = function() {
+  var i = 0;
+  var l = 1000;
+  for(; i < l; i++) {
+    var angle = 2 * Math.PI * Math.random();
+    this.particleStore.push({
+      x: 0,
+      y: 0,
+      r: 3 + 2*Math.random(),
+      phi: angle,
+      // phi: 2 * Math.PI * Math.random(),
+      // R: Torus.R + Math.random() * Torus.r * Math.sin(2 * Math.PI * Math.random()),
+      R: Torus.R + 40*Math.sin(angle*10),
+      // w: Plasma.w * Math.sin(2 * Math.PI * Math.random()) + Plasma.wSpread * Math.random(),
+      w: Plasma.w * (Math.random() > 0.5 ? 1 : -1) + Plasma.wSpread * Math.random(),
+      // angleX: Math.random() * 360,
+      // angleY: Math.random() * 360,
+      // speedX: (Math.random() * 0.01) - (0.1 / 2),
+      // speedY: (Math.random() * 0.01) - (0.01 / 2),
+      // radX: Math.random() * this.stageConfig.centerX,
+      // radY: Math.random() * this.stageConfig.centerY
+    });
+  }
+
+  return this;
+};
+
+proto.render = function() {
+  this.update();
+  this.draw();
+  window.requestAnimationFrame(this.renderHandler);
+};
+
+proto.update = function() {
+  var i = 0;
+  var l = this.particleStore.length;
+  var lastTime = Date.now();
+  for(; i < l; i++) {
+    this.particleStore[i].phi += this.particleStore[i].w * params.tscale;
+    // this.particleStore[i].R = Torus.R + 40*Math.sin(this.particleStore[i].phi*10);
+    this.particleStore[i].R += (Torus.R - this.particleStore[i].R) * params.focus / 100
+                            - (Torus.R - this.particleStore[i].R) / 20 * Math.random() * Math.sin(2 * Math.PI * Math.random());
+    // this.particleStore[i].R *= (1 + 0.01*Math.sin(2*Math.PI*lastTime/1000)+0.01*Math.cos(this.particleStore[i].phi));
+    this.particleStore[i].x = this.stageConfig.centerX + Math.cos(this.particleStore[i].phi) * this.particleStore[i].R * params.scale;
+    this.particleStore[i].y = this.stageConfig.centerY + Math.sin(this.particleStore[i].phi) * this.particleStore[i].R * params.scale;
+  }
+};
+
+proto.draw = function() {
+  this.stageConfig.context.clearRect(0, 0, this.stageConfig.stage.width, this.stageConfig.stage.height);
+  var i = 0;
+  var l = this.particleStore.length;
+  for(; i < l; i++) {
+    var p = new Particle(this.stageConfig, this.particleStore[i]);
+    p.draw();
+  }
+};
+
+new ParticlesView();
+
+//==============================================================================
+//                                     END
+//==============================================================================
+
+</script>
+
+</body>
+
+</html>

@@ -124,7 +124,8 @@ function setup() {
         coilcontainer.addChild(allcoils);
         allcoils.alpha = 0.5;
 
-        allcoilsglow = new PIXI.Sprite(id["coils_all4_glow.png"]);
+        // allcoilsglow = new PIXI.Sprite(id["coils_all4_glow.png"]);
+        allcoilsglow = new PIXI.Sprite(id["glowcoils_whiter.png"]);
         allcoilsglow.anchor.set(0.5,0.5);
         allcoilsglow.position.set(torCenter.x,torCenter.y);
         coilcontainer.addChild(allcoilsglow);

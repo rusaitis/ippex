@@ -1,0 +1,353 @@
+<HTML>
+<HEAD>
+  <META NAME="GENERATOR" CONTENT="Microsoft FrontPage 4.0">
+  <TITLE>Application form for Plasma Science Fusion Energy Institute</TITLE>
+</HEAD>
+<BODY>
+
+<P ALIGN=CENTER><img alt="Princeton Plasma Physics Laboratory" src="title_centered.gif" width="450" height="50"></P>
+
+
+<!-- rem <FORM METHOD="POST" ACTION="/htbin/cgi-mailto2/azwicker" ENCTYPE="x-www-form-encoded"> -->
+
+
+
+<!--webbot BOT="GeneratedScript" PREVIEW=" " startspan --><script Language="JavaScript"><!--
+function FrontPage_Form1_Validator(theForm)
+{
+
+  var checkOK = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzƒŠŒŽšœžŸÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ";
+  var checkStr = theForm.Address.value;
+  var allValid = true;
+  for (i = 0;  i < checkStr.length;  i++)
+  {
+    ch = checkStr.charAt(i);
+    for (j = 0;  j < checkOK.length;  j++)
+      if (ch == checkOK.charAt(j))
+        break;
+    if (j == checkOK.length)
+    {
+      allValid = false;
+      break;
+    }
+  }
+  if (!allValid)
+  {
+    alert("Please enter only letter characters in the \"Address\" field.");
+    theForm.Address.focus();
+    return (false);
+  }
+
+  var checkOK = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzƒŠŒŽšœžŸÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ";
+  var checkStr = theForm.School.value;
+  var allValid = true;
+  for (i = 0;  i < checkStr.length;  i++)
+  {
+    ch = checkStr.charAt(i);
+    for (j = 0;  j < checkOK.length;  j++)
+      if (ch == checkOK.charAt(j))
+        break;
+    if (j == checkOK.length)
+    {
+      allValid = false;
+      break;
+    }
+  }
+  if (!allValid)
+  {
+    alert("Please enter only letter characters in the \"School\" field.");
+    theForm.School.focus();
+    return (false);
+  }
+
+  var checkOK = "0123456789-.,";
+  var checkStr = theForm.YearsExp.value;
+  var allValid = true;
+  var decPoints = 0;
+  var allNum = "";
+  for (i = 0;  i < checkStr.length;  i++)
+  {
+    ch = checkStr.charAt(i);
+    for (j = 0;  j < checkOK.length;  j++)
+      if (ch == checkOK.charAt(j))
+        break;
+    if (j == checkOK.length)
+    {
+      allValid = false;
+      break;
+    }
+    if (ch == ".")
+    {
+      allNum += ".";
+      decPoints++;
+    }
+    else if (ch != ",")
+      allNum += ch;
+  }
+  if (!allValid)
+  {
+    alert("Please enter only digit characters in the \"YearsExp\" field.");
+    theForm.YearsExp.focus();
+    return (false);
+  }
+
+  if (decPoints > 1)
+  {
+    alert("Please enter a valid number in the \"YearsExp\" field.");
+    theForm.YearsExp.focus();
+    return (false);
+  }
+  return (true);
+}
+//--></script><!--webbot BOT="GeneratedScript" endspan --><FORM METHOD="GET" action="ApplicationConfirm.asp" onsubmit="return FrontPage_Form1_Validator(this)" name="FrontPage_Form1">
+
+
+<div align="center">
+  <center>
+  <table border="1" width="84%" bordercolor="#DDDDDD" cellspacing="0" height="737">
+    <tr>
+      <td width="100%" bgcolor="#EBEBEB" colspan="2" height="142">
+
+
+<P ALIGN=CENTER><B><FONT SIZE=+1>Plasma Science and Fusion Energy Institute<br>
+for High School Physics Teachers<br>
+July 17-28, 2000<br>
+</FONT>APPLICATION FORM<FONT COLOR="#FF0000"><br>
+Deadline for receipt of applications
+is April 30, 2000<br>
+</FONT></B>(Any problems with this form, please contact <a href="mailto:azwicker@pppl.gov"> Andrew Post-Zwicker</a>
+@ 609-243-2150<br>
+You may also choose to download a <a href="Application.pdf"> PDF version of the application</a>.</P>
+
+      </td>
+    </tr>
+    <tr>
+      <td width="100%" bgcolor="#EBEBEB" colspan="2" height="95">
+
+<P ALIGN=CENTER>It is <B>strongly suggested</B> that you answer the longer
+sections of the application form in a separate document that you<B> save
+</B>on your hard drive and then cut and paste this information into the
+form. This is to minimize the possibility of losing any of your work while
+filling out the form.  The SUBMIT button at the bottom of this page sends
+the complete application.  Please make sure that all information is accurate before
+SUBMITing it.</P>
+
+      </td>
+    </tr>
+    <tr>
+      <td width="100%" bgcolor="#FFFFCC" valign="top" colspan="2" height="16"><b><font size="4">Personal
+        Information</font></b></td>
+    </tr>
+    <tr>
+      <td width="29%" bgcolor="#EBEBEB" valign="top" height="19" align="right"><b>Name</b></td>
+      <td width="71%" height="19">
+
+<P><INPUT NAME="name" TYPE="text" SIZE="29"></P>
+
+      </td>
+    </tr>
+    <tr>
+      <td width="29%" bgcolor="#EBEBEB" valign="top" height="19" align="right"><b>SS#</b></td>
+      <td width="71%" height="19"><INPUT NAME="SS #" TYPE="text" SIZE="29"></td>
+    </tr>
+    <tr>
+      <td width="29%" bgcolor="#EBEBEB" valign="top" height="14" align="right"><b>Home
+        Address</b></td>
+      <td width="71%" height="14"><!--webbot bot="Validation"
+        S-Data-Type="String" B-Allow-Letters="TRUE" --><textarea rows="2" name="Address" cols="24"></textarea></td>
+    </tr>
+    <tr>
+      <td width="29%" bgcolor="#EBEBEB" valign="top" height="19" align="right"><b>Phone</b></td>
+      <td width="71%" height="19"><INPUT NAME="phone" TYPE="text" SIZE="29"></td>
+    </tr>
+    <tr>
+      <td width="29%" bgcolor="#EBEBEB" valign="top" height="19" align="right"><b>eMail</b></td>
+      <td width="71%" height="19"><INPUT NAME="email" TYPE="text" SIZE="29"></td>
+    </tr>
+    <tr>
+      <td width="100%" bgcolor="#FFFFCC" valign="top" height="19" colspan="2"><b><font size="4">Teaching
+        Information</font></b></td>
+    </tr>
+    <tr>
+      <td width="29%" bgcolor="#EBEBEB" valign="top" height="19" align="right"><b>School
+        Name &amp; Address </b>(where presently teaching)</td>
+      <td width="71%" height="19">
+
+<P><!--webbot bot="Validation" S-Data-Type="String" B-Allow-Letters="TRUE" --><textarea rows="2" name="School" cols="24"></textarea></P>
+
+      </td>
+    </tr>
+    <tr>
+      <td width="29%" bgcolor="#EBEBEB" valign="top" height="19" align="right"><b>School
+        Phone #&nbsp;</b></td>
+      <td width="71%" height="19"> <INPUT NAME="SchoolPhone" TYPE="text" SIZE="29"></td>
+    </tr>
+    <tr>
+      <td width="29%" bgcolor="#EBEBEB" valign="top" height="19" align="right"><b>Principal's
+        Name</b></td>
+      <td width="71%" height="19"><INPUT NAME="PrincipalName" TYPE="text" SIZE="29"></td>
+    </tr>
+    <tr>
+      <td width="100%" bgcolor="#FFFFCC" valign="top" height="19" colspan="2"><font size="4"><b>Educational
+        Information</b></font></td>
+    </tr>
+    <tr>
+      <td width="29%" bgcolor="#EBEBEB" valign="top" height="19" align="right">
+
+<P><b>List in reverse chronological order the colleges/universities attended
+where a formal degree was earned.<br>
+</b>(University,<B> </B>Highest<B> </B>Degree Earned,<B> </B>Major<B>,</B>
+Award Date)&nbsp;</P>
+
+      </td>
+      <td width="71%" height="19"><TEXTAREA NAME="CollegesAttended" ROWS="6" COLS="55"
+></TEXTAREA></td>
+    </tr>
+  </center>
+  <tr>
+    <td width="100%" bgcolor="#FFFFCC" valign="top" height="19" align="right" colspan="2">
+      <p align="left"><font size="4"><b>Educational </b></font><font size="4"><b>Experience</b></font></td>
+  </tr>
+  <center>
+  <tr>
+    <td width="29%" bgcolor="#EBEBEB" valign="top" height="19" align="right"><b>List undergraduate science/math/technology courses taken.</b></td>
+    <td width="71%" height="19"><TEXTAREA NAME="UndergradCourses" ROWS="4" COLS="55"
+></TEXTAREA></td>
+  </tr>
+  <tr>
+    <td width="29%" bgcolor="#EBEBEB" valign="top" height="19" align="right"><b>List graduate science/math/technology courses taken.</b></td>
+    <td width="71%" height="19"><TEXTAREA NAME="GradCourses" ROWS="4" COLS="55"
+></TEXTAREA></td>
+  </tr>
+  </center>
+  <tr>
+    <td width="100%" bgcolor="#FFFFCC" valign="top" height="19" align="right" colspan="2">
+      <p align="left"><font size="4"><b>Professional Experience</b></font></td>
+  </tr>
+  <center>
+  <tr>
+    <td width="29%" bgcolor="#EBEBEB" valign="top" height="19" align="right"><b> Number of years you have taught
+      science / math / technology classe</b>s&nbsp;<br>
+ (include
+the sum of part-time teaching assignments.)</td>
+    <td width="71%" height="19"><!--webbot bot="Validation" S-Data-Type="Number"
+      S-Number-Separators=",." --><INPUT NAME="YearsExp"
+TYPE="text" SIZE="29"></td>
+  </tr>
+  <tr>
+    <td width="29%" bgcolor="#EBEBEB" valign="top" height="19" align="right"><b> Teaching assignments this school year
+      </b> (include grade levels for each</td>
+    <td width="71%" height="19"><TEXTAREA NAME="TeachingAssign" ROWS="4" COLS="56"
+></TEXTAREA></td>
+  </tr>
+  <tr>
+    <td width="29%" bgcolor="#EBEBEB" valign="top" height="19" align="right"><b> Anticipated teaching assignments next year&nbsp;</b><br>
+ (if different from above):</td>
+    <td width="71%" height="19"><TEXTAREA NAME="FutureTeachings" ROWS="4" COLS="56"
+></TEXTAREA></td>
+  </tr>
+  <tr>
+    <td width="29%" bgcolor="#EBEBEB" valign="top" height="19" align="right"><b> How have you advanced your professional development</b>&nbsp;<br>
+ (e.g., workshops,
+institutes, conferences, research experience) during the last 3 to 5 years</td>
+    <td width="71%" height="19"><TEXTAREA NAME="ProDev" ROWS="4" COLS="56"
+></TEXTAREA></td>
+  </tr>
+  </center>
+  <tr>
+    <td width="29%" bgcolor="#EBEBEB" valign="top" height="19">
+      <p align="right"><b> Describe your leadership activities, contributions to science, math
+or technology education </b> (in-class or out of class),<b> or other outstanding
+accomplishments during the last 3 to 5 years.</b></td>
+    <center>
+    <td width="71%" height="19"><TEXTAREA NAME="LeadershipActivities" ROWS="4" COLS="56"
+></TEXTAREA></td>
+    </tr>
+  </center>
+  <tr>
+    <td width="29%" bgcolor="#EBEBEB" valign="top" height="19">
+      <p align="right"><b> List any relevant publications that you may have.</b></td>
+    <center>
+    <td width="71%" height="19"><TEXTAREA NAME="Publications" ROWS="4" COLS="56"
+></TEXTAREA></td>
+    </tr>
+  </center>
+  <tr>
+    <td width="29%" bgcolor="#EBEBEB" valign="top" height="19">
+      <p align="right"><b> Briefly describe your teaching philosophy. Include how your teaching
+is innovative and describe your goals when teaching. Include a lesson plan,
+if available. If necessary, this can be faxed instead of included here</b> (609-243-2112).</td>
+    <center>
+    <td width="71%" height="19"><TEXTAREA NAME="TeachingPhilosophy" ROWS="4" COLS="56"
+></TEXTAREA></td>
+    </tr>
+    <tr>
+      <td width="100%" bgcolor="#FFFFCC" valign="top" height="19" colspan="2"><font size="4"><b>Equipment
+        Experience</b></font></td>
+    </tr>
+    <tr>
+      <td width="29%" bgcolor="#EBEBEB" valign="top" height="19" align="right"><b> List scientific or electronic equipment experience and the extent
+of this experience. Have you ever worked with high voltage power supplies?
+Other electrical equipment? Vacuum pumps? Optics/Spectrometers? Lasers?</b></td>
+      <td width="71%" height="19"><TEXTAREA NAME="EquiptExperience" ROWS="4" COLS="56"
+></TEXTAREA></td>
+    </tr>
+    <tr>
+      <td width="29%" bgcolor="#EBEBEB" valign="top" height="19" align="right"><b> List computer hardware and software experience,  your level of proficiency
+and length of experience</b></td>
+      <td width="71%" height="19"><TEXTAREA NAME="CompExpierence" ROWS="4" COLS="56"
+></TEXTAREA></td>
+    </tr>
+    <tr>
+      <td width="29%" bgcolor="#EBEBEB" valign="top" height="19" align="right">
+
+<P><b>4. Do you use the Internet with your students? How? Do you use email
+regularly?</b></P>
+
+        <p>&nbsp;</td>
+      <td width="71%" height="19"><TEXTAREA NAME="IntExpierence" ROWS="4" COLS="56"
+></TEXTAREA></td>
+    </tr>
+    <tr>
+      <td width="29%" bgcolor="#EBEBEB" valign="top" height="19" align="right"><b> How did you learn about the Institute?</b></td>
+      <td width="71%" height="19">
+
+<P><INPUT TYPE="checkbox" NAME="DOE" VALUE="on">Through the
+state Department of Education, school district, school administration.<br>
+<INPUT TYPE="checkbox" NAME="HowDidYouLearnAboutUs" VALUE="Journal">Announcement in a professional
+journal.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <INPUT NAME="Professional Journal" TYPE="text" SIZE="30"><br>
+<INPUT TYPE="checkbox" NAME="HowDidYouLearnAboutUs" VALUE="DirectMailing">Direct mailing.<br>
+<INPUT TYPE="checkbox" NAME="HowDidYouLearnAboutUs" VALUE="DOE Lab">  DOE Laboratory. Please
+name.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <INPUT NAME="DoE Laboratory" TYPE="text" SIZE="30"><br>
+<INPUT TYPE="checkbox" NAME="HowDidYouLearnAboutUs" VALUE="on">Other (Please be specific).&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<INPUT NAME="Other details" TYPE="text" SIZE="30"></P>
+
+      </td>
+    </tr>
+    <tr>
+      <td width="100%" bgcolor="#FFFFCC" valign="top" height="19" colspan="2"><font size="4"><b>Application
+        Certification</b></font></td>
+    </tr>
+    <tr>
+      <td width="100%" bgcolor="#EBEBEB" valign="top" height="19" colspan="2">
+        <p align="center">I certify that the information contained herein is true, complete, and
+correct, and that I plan <B>to return to the classroom as a teacher for
+the following school year.</B></p>
+        <p align="center"><INPUT TYPE="checkbox" NAME="Complete" VALUE=
+"I Agree">By checking this box, I acknowledge that my application is complete and
+ready for review.</p>
+        <p align="center"><INPUT NAME="Application submitted" TYPE="submit" VALUE=
+"Submit"></td>
+    </tr>
+  </table>
+  </center>
+</div>
+
+<P>&nbsp;</P>
+
+</FORM>
+</BODY>
+</HTML>

@@ -1,0 +1,147 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>PIXI DEMO</title>
+    <style>
+        body{
+          margin:0;
+          padding:0;
+        }
+
+        #canvas-holder{
+          width:1024px;
+          height:768px;
+          background-color:#000000;
+          margin:auto;
+        }
+
+        .pixi-test{
+          width:100%;
+          height:100%;
+          background-color:#220000;
+        }
+    </style>
+    <link rel="stylesheet" href="../bower_components/katex/dist/katex.min.css">
+    <script src="../bower_components/katex/dist/katex.min.js"></script>
+</head>
+
+<body>
+
+    <div id="appPanel"></div>
+    <div id="container"></div>
+    <!-- // <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> -->
+    <!-- // <script src="//cdnjs.cloudflare.com/ajax/libs/pixi.js/1.5.3/pixi.js"></script> -->
+    <script src="../js/TweenMax.min.js"></script>
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../bower_components/pixi/bin/pixi.min.js"></script>
+    <!-- // <script src="js/jquery.mobile-1.4.5.min.js"></script> -->
+    <!-- // <script src="../js/konva.min.js"></script> -->
+    <script src="../js/ui.js"></script>
+    <!-- // <script src="../js/math.js"></script> -->
+    <!-- // <script src="js/ui.js"></script> -->
+    <!-- // <script src="js/slider.js"></script> -->
+    <!-- // <script src="js/button.js"></script> -->
+    <script defer="defer">
+
+//==============================================================================
+//                                  START
+//==============================================================================
+    $(function() {
+        var stage = new PIXI.Stage(0x0c0c0c);
+    var renderer = PIXI.autoDetectRenderer(500,750, {antialias: true});
+    $("#appPanel").append(renderer.view);
+    var graph = new FingerGraph({r:renderer, s:stage, x:50, y:50});
+});
+
+function FingerGraph(options) {
+    var options = options || {};
+    var s = options.s || null;
+    var r = options.r || null;
+    var x = options.x || 0;var y = options.y || 0;
+    var h = options.h || 0;
+    var w = options.w || 0;
+
+    var nodes = [];
+    var graph = new PIXI.DisplayObjectContainer();
+    var cp = new PIXI.DisplayObjectContainer();
+
+    var c1 = circleToSprite(20, 0x9966FF);
+    var c2 = circleToSprite(20, 0x9966FF);
+    var c3 = circleToSprite(20, 0x9966FF);
+    var c4 = circleToSprite(20, 0x9966FF);
+
+      place(50,50, c1, graph);
+      place(150,100, c2, graph);
+      place(275,75, c3, graph);
+      place(175,300, c4, graph);
+
+    s.addChild(cp);
+    s.addChild(graph);
+    plot();
+    r.render(s);
+
+    function place(x, y, s, ct) {
+      nodes.push(s);
+      s.x = x;
+      s.y = y;
+      s.interactive = true;
+      s.anchor.x = 0.5;
+      s.anchor.y = 0.5;
+
+      s.mousedown = s.touchstart = function(data) {
+                this.data = data;
+                this.dragging = true;
+            };
+
+            s.mouseup = s.mouseupoutside = s.touchend = s.touchendoutside = function(data) {
+                this.dragging = false;
+                this.data = null;
+            };
+
+            s.mousemove = s.touchmove = function(data) {
+        if (this.dragging) {
+          var newPosition = this.data.getLocalPosition(this.parent);
+          this.position.x = newPosition.x;
+          this.position.y = newPosition.y;
+          plot();
+        }
+            }
+
+      ct.addChild(s);
+    }
+
+    function plot() {
+      var l = [];
+      cp.removeChildren();
+      for (var i=0; i < nodes.length-1; i++) {
+        l[i] = new PIXI.Graphics();
+        l[i].lineStyle(2, 0xf7e309);
+        l[i].moveTo(nodes[i].x, nodes[i].y);
+        l[i].lineTo(nodes[i+1].x, nodes[i+1].y);
+        cp.addChild(l[i]);
+      }
+      r.render(s);
+    }
+
+    function circleToSprite(radius, color) {
+      var circle = new PIXI.Graphics();
+            circle.beginFill(0x9966FF);
+            circle.drawCircle(0, 0, radius);
+            circle.endFill();
+            var texture = circle.generateTexture();
+            return new PIXI.Sprite(texture);
+    }
+
+        return {
+        place:place,
+        plot:plot,
+        circleToSprite:circleToSprite
+        };
+
+}
+    </script>
+
+</body>
+
+</html>

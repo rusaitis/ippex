@@ -1,0 +1,433 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>IPPEX</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #444444;
+        }
+
+        .rendererView {
+            position: absolute;
+            display: block;
+            height: 100%;
+        }
+        .console {
+          display: block;
+          margin: 0;
+          width: 100%;
+          font-family: Helvetica Neue, sans-serif;
+          font-size: 35px;
+          font-weight: lighter;
+          appearance: none;
+          box-shadow: none;
+          border-radius: none;
+          background: transparent;
+          border: none;
+          color: #ffffff;
+        }
+        .console:focus {
+          outline: none;
+        }
+        .title{
+            color: white;
+            font-weight: lighter;
+            font-size: 32px;
+            font-family: Helvetica Neue, sans-serif;
+        }
+        #console {
+          font-size: 16px;
+          height: 350px;
+          width: 300px;
+          color: #d4ffe2;
+        }
+        #container {
+          background-color: #444444;
+        }
+        .temperature {
+            color: #89ff8f;
+        }
+    </style>
+    <link rel="stylesheet" href="../bower_components/katex/dist/katex.min.css">
+    <script src="../bower_components/katex/dist/katex.min.js"></script>
+</head>
+
+<body>
+<div id="title" class="title" style="position: absolute; top: 10px; left: 100px;'">
+    <!-- <i class="fa fa-globe fa-inverse fa-3x"></i> -->
+    <input type="text" id="status" class="console"></input>
+    <textarea type="text" id="console" class="console"></textarea>
+</div>
+<div id="score" class="title" style="position: absolute; top: 550px; left: 100px;'">
+SCORE: 0
+</div>
+<div id="temperatureDiv" class="title" style="position: absolute; top: 600px; left: 100px; color: #89ff8f;'">
+<!-- TEMPERATURE: 0 -->
+<input type="text" id="temperature" class="console temperature"></input>
+</div>
+<div id="container"></div>
+<script src="../js/stats.min.js"></script>
+<script src="../js/dat.gui.min.js"></script>
+<!-- // <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> -->
+<!-- // <script src="//cdnjs.cloudflare.com/ajax/libs/pixi.js/1.5.3/pixi.js"></script> -->
+<script src="../js/TweenMax.min.js"></script>
+<script src="../js/jquery-2.1.3.min.js"></script>
+<script src="../bower_components/pixi/bin/pixi.min.js"></script>
+<!-- // <script src="js/jquery.mobile-1.4.5.min.js"></script> -->
+<!-- // <script src="../js/konva.min.js"></script> -->
+<script src="../js/ui.js"></script>
+<!-- // <script src="../js/math.js"></script> -->
+<!-- // <script src="js/ui.js"></script> -->
+<!-- // <script src="js/slider.js"></script> -->
+<!-- // <script src="js/button.js"></script> -->
+<!-- <script src="toka.js"></script> -->
+<script defer="defer">
+
+
+// console.log("1'st quadrant: " + Math.atan());
+var aliens = [];
+var totalDudes = 30;
+
+
+var radius= 20;                                 // radius
+var anim;                                       // Konva animation
+var onRight = false;                            // are all balls on right?
+var oldOnRight;                                 // track changes
+var onLeft = false;                             // are all balls on left?
+var oldOnLeft;                                  // track changes
+var left_rect_color = "#338833";                     // color of the indicator rect
+var right_rect_color = "#0099FF";                     // color of the indicator rect
+var text_color = "#cccccc";                     // color of the text
+var ball_color = "#cccccc";                     // color of the balls
+
+
+/*
+ *  ====METRICS====
+ */
+
+var percentageOnLeftPredicted;
+var percentageOnLeftActual;
+var timeOnLeft;
+var timeTotal;
+var ballCount;
+
+/*
+ *  ====VARIABLES FOR REUSE====
+ */
+
+var x;
+var y;
+//==============================================================================
+//                                  START
+//==============================================================================
+
+var Params = function() {
+  this.message = 'dat.gui';
+  this.speed = 1;               // speed of ball
+  this.maxwellsDemon = false;           // turn on maxwell's demon?
+//  this.displayOutline = false;
+  this.addBall = function(){createBall()};
+  this.removeBall = function(){removeBall()};
+  this.startInSamePlace = function(){startInSamePlace()};
+};
+
+
+text = new Params();
+var gui = new dat.GUI();
+gui.add(text, 'message');
+gui.add(text, 'speed', -5, 5);
+gui.add(text, 'maxwellsDemon');
+//  gui.add(text, 'displayOutline');
+gui.add(text, 'addBall');
+gui.add(text, 'removeBall');
+gui.add(text, 'startInSamePlace');
+
+function getRandomReal(min, max) {
+  return Math.random() * (max - min + 1) + min;
+}
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function getDisplacement(obj1, obj2){
+    var result = {};
+    var dx =  (obj2.x - obj1.x);
+    var dy = -(obj2.y - obj1.y);
+    // document.getElementById("console").value = (dx + ' ' + dy);
+    result.distance = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+    result.angle = Math.atan2(dy, dx);
+    return result;
+}
+
+function getForce(a1, a2, distance){
+    return a1 * a2 / (Math.pow(distance,2));
+}
+// stats
+var stats = new Stats();
+stats.domElement.style.position = 'absolute';
+stats.domElement.style.left = '0px';
+stats.domElement.style.top = '0px';
+document.body.appendChild( stats.domElement );
+
+// PIXI
+
+// ///////////////////////////////////////////////////////////
+// Particle
+// ///////////////////////////////////////////////////////////
+
+var renderer = PIXI.autoDetectRenderer(width, height, {backgroundColor : 0x0e0e0e});
+document.body.appendChild(renderer.view);
+
+// create the root of the scene graph
+var stage = new PIXI.Container();
+// stage.position.x = renderer.width / 2;
+// stage.position.y = renderer.height / 2;
+// stage.interactive = true;
+
+// var ballLayer = new Konva.Layer();              // put balls here
+// var textLayer = new Konva.Layer();              // write metrics here
+// var backgroundLayer = new Konva.Layer();        // background objects
+// var buttonLayer = new Konva.Layer();
+
+// var container = new PIXI.Container();
+var backgroundLayer = new PIXI.Container();
+var ballLayer = new PIXI.Container();
+var textLayer = new PIXI.Container();
+var buttonLayer = new PIXI.Container();
+
+stage.addChild(backgroundLayer);
+stage.addChild(ballLayer);
+// stage.addChild(container);
+stage.addChild(textLayer);
+stage.addChild(buttonLayer);
+
+
+
+// holder to store the aliens
+
+for (var i = 0; i < totalDudes; i++)
+{
+    var dude =  PIXI.Sprite.fromImage('spark5.png');
+    var vel_angle = Math.random() * 2 * Math.PI;
+    dude.velocity = {
+        x: Math.cos(vel_angle),
+        y: Math.sin(vel_angle)
+    };
+
+    // set the anchor point so the texture is centerd on the sprite
+    dude.anchor.set(0.5);
+
+    // set a random scale for the dude - no point them all being the same size!
+    // dude.scale.set(1.4 + MatDh.random() * 0.3);
+    dude.scale.set(1.5);
+
+    // finally lets set the dude to be at a random position..
+    dude.radius = 5;
+    dude.position.x = dude.radius + Math.random() * (width - 2 * dude.radius);
+    dude.position.y = dude.radius + Math.random() * (height - 2 * dude.radius);
+    dude.inertia = 1;
+    // dude.tint = Math.random() * 0xFFFFFF;
+    // dude.tint = (0.7+Math.random() * 0.001) * 0xFFFFFF;
+    // dude.PIXI.filters.BloomFilter(10);
+
+    // create some extra properties that will control movement :
+    // create a random direction in radians. This is a number between 0 and PI*2 which is the equivalent of 0 - 360 degrees
+    // dude.direction = Math.random() * Math.PI * 2;
+
+    // this number will be used to modify the direction of the dude over time
+    // dude.turningSpeed = Math.random() - 0.8;
+
+    // create a random speed for the dude between 0 - 2
+    // dude.speed = (2 + Math.random() * 2)/10;
+
+
+    // finally we push the dude into the aliens array so it it can be easily accessed later
+    aliens.push(dude);
+
+    ballLayer.addChild(dude);
+}
+
+
+var bg = PIXI.Sprite.fromImage("img/reactorBG5.png");
+// bg.position = ({x:width/2, y:height/2});
+// bg.position.x = (width/2);
+// bg.offset.x = (width/2);
+bg.anchor.set(0.5);
+bg.scale.set(1.12,1.12);
+// background.addChild(bg);
+// bg.zIndex = 2;
+
+// var blurFilter1 = new PIXI.filters.BlurFilter();
+// var blurFilter1 = new  PIXI.filters.InvertFilter()
+var blurFilter1 = new PIXI.filters.BloomFilter();
+// var blurFilter1 = new PIXI.filters.GrayFilter();
+// var blurFilter1 = new PIXI.filters.PixelateFilter();
+// var blurFilter1 = new PIXI.filters.TwistFilter();
+// var blurFilter1 = new PIXI.filters.NoiseFilter();
+// var blurFilter1 = new PIXI.filters.DropShadowFilter();
+// var blurFilter1 = new PIXI.filters.SepiaFilter();
+// var blurFilter1 = new PIXI.filters.SmartBlurFilter();
+// var blurFilter1 = new PIXI.filters.CrossHatchFilter();  // *
+// var blurFilter1 = new PIXI.filters.TiltShiftFilter();
+// var blurFilter1 = new PIXI.filters.BlurDirFilter(0.5, 0.5);
+ballLayer.filters = [blurFilter1];
+// var blurAmount1 = 0.01 ;
+
+var count = 0;
+
+// create a bounding box for the little dudes
+var dudeBoundsPadding = 2;
+var dudeBounds = new PIXI.Rectangle(-dudeBoundsPadding,
+                                    -dudeBoundsPadding,
+                                    renderer.width + dudeBoundsPadding * 2,
+                                    renderer.height + dudeBoundsPadding * 2);
+
+var tick = 0;
+var timePrev;
+var timeNow = Date.now()/1;
+requestAnimationFrame(animate);
+
+function animate() {
+
+    timePrev = timeNow;
+    timeNow = Date.now();
+    var timeDiff = (timeNow - timePrev)/10;
+    // document.getElementById("temperature").value = ("TEMPERATURE: " + finalTemp);
+    // document.getElementById("console").value = ('Mag: ' + magVal + '\n' + 'Dens: ' + densVal + '\n' + 'Pow: ' + powVal + '\n\n' + 'Temp: ' + finalTemp  + '\n' + 'Score: ' + finalScore + '\n\n' + 'P_oh: ' + finalOut.P_oh * 1.e-6 + '\n' + 'P_alpha: ' + finalOut.P_alpha * 1.e-6 + '\n' + 'P_cond: ' + finalOut.P_cond * 1.e-6 + '\n' + 'P_rad: ' + finalOut.P_rad * 1.e-6 + '\n\n' + 'Beta thermal: ' + finalOut.beta_th + '\n' + 'Beta alpha: ' + finalOut.beta_falpha + '\n'+ 'Beta: ' + finalOut.beta + '\n' + 'Beta max: ' + finalOut.betamax + '\n\n' + 'Density: ' + finalOut.densreal*1.e-20 + '\n' + 'Dens_max: ' + finalOut.densmax*1.e-20 + '\n');
+
+    // iterate through the dudes and update their position
+    oldOnRight = onRight;
+    onRight = true;
+    oldOnLeft = onLeft;
+    onLeft = true;
+
+    for (var i = 0; i < aliens.length; i++)
+    {
+        var dudeA = aliens[i];
+        var totalForce = {
+            x: 0,
+            y: 0
+        };
+        for (var j = 0; j < aliens.length; j++) {
+            if (j !== i) {
+                var dudeB = aliens[j];
+                var displ = getDisplacement(dudeB, dudeA);
+                var force = getForce(1, 1, displ.distance);
+                totalForce.x += force * Math.cos(displ.angle);
+                totalForce.y +=-force * Math.sin(displ.angle);
+                // document.getElementById("console").value = (force);
+                // document.getElementById("console").value = (totalForce.x);
+            }
+        }
+
+        dudeA.a = {
+            x: -totalForce.x / dude.inertia * 10,
+            y: -totalForce.y / dude.inertia * 10
+        }
+        dudeA.velocity.x += dudeA.a.x * timeDiff;
+        dudeA.velocity.y += dudeA.a.y * timeDiff;
+        dudeA.x += text.speed * dudeA.velocity.x * timeDiff/10;
+        dudeA.y += text.speed * dudeA.velocity.y * timeDiff/10;
+        // document.getElementById("console").value = (dudeA.a.x);
+        // dudeA.x += text.speed * dudeA.velocity.x * timeDiff/10;
+        // dudeA.y += text.speed * dudeA.velocity.y * timeDiff/10;
+
+        // dude.scale.set(0.65+0.35*Math.sin((dude.phiRun+dude.phiStart)*2));
+        // dude.scale.set(0.8*plasmaPathScale(dude.phi, 0));
+        // dude.alpha = plasmaPathScale(dude.phi, Math.PI/8);
+        // dude.alpha(0.5 + 0.5 * Math.pow( Math.sin( (dude.phi  - Math.PI/8) * 2), 2) );
+        // dude.scale.set(0.6 + 0.4 * Math.cos( (dude.phiRun) * 2) );
+        // dude.mesh.alpha = 0.5;
+        // dude.globalAlpha = (0.5);
+
+
+        // dude.x += text.speed * dude.velocity.x * timeDiff/10;
+        // dude.y += text.speed * dude.velocity.y * timeDiff/10;
+        // var x = dude.x;
+        // var y = dude.y;
+        // var radius = dude.radius;
+
+
+        // console.log(timeDiff);
+        // dude.tint = (0.7+(finalTemp/1000) * 0.0001) * 0xFFFFFF;
+
+        // if ((params.highlightFieldLine === true) & (dude.group === 1))
+        //     dude.tint = (0.3+(finalTemp/1000) * 0.0001) * 0xFFFFFF;
+        // if ((params.highlightBatch === true) & (dude.label === 'batch'))
+        //     dude.tint = 0xFFFFFF;
+
+
+    //     // collisions with sides
+
+    //     // ceiling
+    //     if (y < radius) {
+    //         y = radius;
+    //         dude.velocity.y *= -1;
+    //     }
+
+    //     // floor
+    //     if (y > (height - radius)) {
+    //         y = height - radius;
+    //         dude.velocity.y *= -1;
+    //     }
+
+    //     // left wall
+    //     if (x < radius) {
+    //         x = radius;
+    //         dude.velocity.x *= -1;
+    //     }
+
+    //     // right wall
+    //     if (x > (width - radius)) {
+    //         x = width - radius;
+    //         dude.velocity.x *= -1;
+    //     }
+
+    // // if (text.maxwellsDemon) {
+    // //     // maxwell's demon
+    // //     if (x > (width / 2) && x - text.speed * dude.velocity.x * timeDiff < (width / 2)) {
+    // //         x = width/2 - radius;
+    // //         dude.velocity.x *= -1;
+    // //     }
+    // // }
+
+    //     // see if we're on the left side of the stage; if not, make it false
+    //     if (x > (width / 2)) {
+    //         onLeft = false;
+    //     } else {
+    //         onRight = false;
+    //     }
+
+    //     // dude.setPosition({x:x, y:y})
+    //     dude.x = x;
+    //     dude.y = y;
+    // // }
+
+    // update metrics
+    // timeTotal += timeDiff;
+    // if (onLeft) { timeOnLeft += timeDiff; }
+    // percentageOnLeftActual = 100 * timeOnLeft / timeTotal;
+
+
+    }
+    // increment the ticker
+    // tick += 0.1;
+
+    // time to render the stage!
+    renderer.render(stage);
+
+    // request another animation frame...
+    requestAnimationFrame(animate);
+}
+//==============================================================================
+//                                     END
+//==============================================================================
+
+</script>
+
+</body>
+
+</html>

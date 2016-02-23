@@ -1,0 +1,92 @@
+<HTML>
+<BODY bgcolor="#ffffff" link="#0000ff" vlink="#ff0000" text="#000000">
+<H2> Virtual Tokamak Exercises </H2>
+<P>
+The calculation used to compute the <A HREF="SSFD_Help_Score.html"> <EM>
+score</EM> </A> for the Virtural Tokamak is really quite complex.
+In fact, fusion scientists actually use a full-fledged (with more
+adjustable controls) version when they want a quick idea of how
+well a tokamak reactor design would work. 
+<P>
+At the same time, this calculation is based on real fusion experiments. 
+With these exercises, you can use the Virtual Tokamak to unearth that
+underlying fusion physics.
+<P>
+<UL>
+    <LI> Investigate the density limit:
+    <OL>
+         <LI> Keeping the magnetic field and auxiliary power the same,
+raise the plasma density in small steps until the plasma disrupts
+(a score of 0.00 is given). Make a note of the slider values for the
+highest density you reach before the disruption.
+         <LI> Change one of the magnetic field or auxiliary power
+sliders and again determine the maximum density.
+         <LI> Repeat this exercise until you understand how the maximum
+density depends on the values of the other two sliders.
+         <LI> Test your theory by estimating the maximum density
+for values of the magnetic field and auxiliary power which you
+haven't tried yet. Then, try them and see if your prediction
+was correct.
+         <LI> Be careful while you're doing this not to get to
+temperatures which are too high, otherwise the limit on the
+temperature will come into play, making it more difficult for you
+to single out the density limit. This is the way real physics works!
+     </OL>
+We'd like to tell you more about the density limit, but frankly we
+just don't really know what causes it!
+<P>
+    <LI> Having understood the density limit, you can examine temperature
+limit. Strictly speaking, it is a limit on the plasma pressure, which is
+the product of the plasma density and temperature. In practice, though,
+it's usually the temperature that increases too much, producing a plasma
+too hot for the magnetic field to confine in a stable manner.
+     <OL> 
+         <LI> At this limit, the ratio of the plasma pressure to the
+pressure of the magnetic field has a certain value which has been 
+determined by experiments and theoretical calculations.
+The way the Virtual Tokamak is designed, this critical ratio is
+always the same.
+         <LI> First, try to find a point where the plasma disrupts
+at this pressure limit. Hold the magnetic field and plasma density
+fixed and slowly raise the auxiliary heating power until you 
+get a score = 0.00. Make a note of the density, temperature,
+and magnetic field for the auxiliary power value just below
+the pressure limit.
+         <LI> How do you know this is not the density limit?
+         <LI> Now, repeat this exercise at one or two other values for
+the magnetic field. How did the maximum possible plasma pressure
+(density times temperature) change?
+         <LI> The relationship between the maximum plasma pressure
+and the magnetic field is complicated by the contribution to the
+plasma pressure made by the high energy helium nuclei which are
+produced by the fusion reactions. In this case, the pressure which
+is compared with the limiting value is significantly larger than
+you will compute just by multiplying the plasma density and
+temperature. 
+      </OL>
+    <LI> Low Temperature Limit. The defining characteristic of a tokamak
+is the toroidal plasma current, which along with the magnetic field
+produced by the external magnetic field coils provides the confining
+and stabilizing forces. As this current runs through the plasma, 
+it generates heat just like electricity does when it runs through a
+circuit. In this exercise, we first set the auxiliary power slider to 0.00.
+     <OL> 
+          <LI> Then, hold the magnetic field constant, and change the density
+in small steps. Make a note of the temperature values at each density. What
+happens to the temperature values as the density is raised?
+          <LI> Now, do the same at a different magnetic field. Considering
+only the lowest densities you tried at each magnetic field, see if you
+can determine the relationship between the magnetic field and the 
+temperature in this <EM> ohmic </EM> heating limit.
+          <LI> Test your theory by first selecting another magnetic field,
+predicting the temperature (at low density), and then running the 
+Virtual Tokamak to see he well you did.
+  </OL>
+</UL>
+
+Had enough yet? If not, you might as well go ahead and read
+<A HREF="http://w3.pppl.gov/~dstotler/SystemsCode/">the paper!</A>
+
+
+</BODY>
+</HTML>
