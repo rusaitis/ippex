@@ -32,6 +32,7 @@ function play() {
                     running.stop();
                     disruptions += 1;
                     if (disruptions >= maxDisruptions) {
+                        dragAndDropManager.releaseAll();
                         state = endgame;
                         stateVar.countStart.state = true;
                         stateVar.countStart.timer = count;
@@ -156,6 +157,7 @@ function play() {
             cityBut.texture = id["cityButOff.png"];
             reactorBot.visible = true;
             reactorTop.visible = true;
+            // tokaContainer.visible = true;
             exchangerContainer.visible = false;
             cityContainer.visible = false;
         }
@@ -166,6 +168,7 @@ function play() {
             cityBut.texture = id["cityButOff.png"];
             reactorBot.visible = false;
             reactorTop.visible = false;
+            // tokaContainer.visible = false;
             exchangerContainer.visible = true;
             cityContainer.visible = false;
         }
@@ -175,12 +178,94 @@ function play() {
             cityBut.texture = id["cityButOn.png"];
             reactorBot.visible = false;
             reactorTop.visible = false;
+            // tokaContainer.visible = false;
             exchangerContainer.visible = false;
             cityContainer.visible = true;
         }
 
         muteBut.texture = (stateVar.mute) ? id["mute.png"] : id["audio.png"];
         if (stateVar.mute) Howler.mute(); else Howler.unmute();
+     
+
+
+        if (stateVar.modal.vessel) {
+            outerWallDanger.alpha = 1;
+            innerWallDanger.alpha = 0;
+            modalVessel.visible = true;
+        } else {
+            modalVessel.visible = false;
+        }
+
+        if (stateVar.modal.centerStack) {
+            modalRight.visible = true;
+            outerWallDanger.alpha = 0;
+            innerWallDanger.alpha = 1;
+        } else {
+            modalRight.visible = false;
+        }
+        if (stateVar.modal.aux) {
+            antennaRed.visible = true;
+            modalRight.visible = true;
+            // modalCenterStack.visible = true;
+        } else {
+            modalRight.visible = false;
+            antennaRed.visible = false;
+            // modalCenterStack.visible = false;
+        }
+        if (stateVar.modal.coils) {
+            modalRight.visible = true;
+            coilsRed.visible = true;
+            // modalCenterStack.visible = true;
+        } else {
+            modalRight.visible = false;
+            coilsRed.visible = false;
+            // modalCenterStack.visible = false;
+        }
+        if (stateVar.modal.tritium) {
+            modalRight.visible = true;
+            tritiumRed.visible = true;
+            // modalCenterStack.visible = true;
+        } else {
+            modalRight.visible = false;
+            tritiumRed.visible = false;
+            // modalCenterStack.visible = false;
+        }
+        if (stateVar.modal.heat) {
+            modalRight.visible = true;
+            heatRed.visible = true;
+            // modalCenterStack.visible = true;
+        } else {
+            modalRight.visible = false;
+            heatRed.visible = false;
+            // modalCenterStack.visible = false;
+        }
+        if (stateVar.modal.steam) {
+            modalLeft.visible = true;
+            steamRed.visible = true;
+            // modalCenterStack.visible = true;
+        } else {
+            modalLeft.visible = false;
+            steamRed.visible = false;
+            // modalCenterStack.visible = false;
+        }
+        if (stateVar.modal.blanket) {
+            modalRight.visible = true;
+            redBlanket.visible = true;
+            // modalCenterStack.visible = true;
+        } else {
+            modalRight.visible = false;
+            redBlanket.visible = false;
+            // modalCenterStack.visible = false;
+        }
+        if (stateVar.modal.city) {
+            modalCity.visible = true;
+            cityRed.visible = true;
+            // modalCenterStack.visible = true;
+        } else {
+            modalCity.visible = false;
+            cityRed.visible = false;
+            // modalCenterStack.visible = false;
+        }
 
         // bisecBut.texture = (stateVar.bisec) ? id["buttonOn.png"] : id["buttonOff.png"];
         // if (densBut.x > contPos.densSlider.pos[0] + contPos.arrowWidth + contPos.buffer + contPos.sliderBoxLength/2) 

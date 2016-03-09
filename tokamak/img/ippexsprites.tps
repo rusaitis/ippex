@@ -246,6 +246,16 @@
             <filename>highScore.png</filename>
             <filename>glowcoils_whiter.png</filename>
             <filename>modaltest.png</filename>
+            <filename>antennaRed.png</filename>
+            <filename>coilsRed.png</filename>
+            <filename>redBlanket.png</filename>
+            <filename>exchangerBlanket.png</filename>
+            <filename>exchangerSquares.png</filename>
+            <filename>exchangerLines.png</filename>
+            <filename>heatRed.png</filename>
+            <filename>steamRed.png</filename>
+            <filename>tritiumRed.png</filename>
+            <filename>cityRed.png</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

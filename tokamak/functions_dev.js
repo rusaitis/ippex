@@ -270,6 +270,39 @@ function overfunRestart() {
 }
 
 
+function buttonizeModal(obj) {
+obj.interactive = true;
+obj.buttonMode = true;
+obj
+    .on('mouseover', overfunModal)
+    .on('mouseup', releasedfunModal)
+    .on('mousedown', pressedfunModal)
+    .on('touchstart',pressedfunModal)
+    .on('touchend', releasedfunModal)
+    .on('mouseout', releasedfunModal)
+    .on('touchendoutside',releasedfunModal);
+}
+
+function pressedfunModal() {
+  // if (![this.txt]) stateVar[this.txt] = !stateVar[this.txt];
+  // buttonState[this.txt] = true;
+  // console.log("pressed "+ buttonState[this.txt]);
+}
+function releasedfunModal() {
+    stateVar.modal[this.txt] = false;
+
+  // buttonState[this.txt] = false;
+    // console.log("released" + buttonState[this.txt]);
+}
+
+function overfunModal() {
+  // console.log(stateVar.modal[this.txt]);
+  stateVar.modal[this.txt] = true;
+  // this.defaultCursor = 'default';
+    // console.log("I'm over "+buttonState[this.txt]);
+}
+
+
 function arrowClicked() {
     var thisobj = this;
     var txtpressed = (this.para2.dir == 'up') ? "upredpressed.png" : "downredpressed.png";
@@ -301,39 +334,39 @@ function arrowReleased() {
 }
 
 
-function keyboard(keyCode) {
-  var key = {};
-  key.code = keyCode;
-  key.isDown = false;
-  key.isUp = true;
-  key.press = undefined;
-  key.release = undefined;
-  //The `downHandler`
-  key.downHandler = function(event) {
-    if (event.keyCode === key.code) {
-      if (key.isUp && key.press) key.press();
-      key.isDown = true;
-      key.isUp = false;
-    }
-    event.preventDefault();
-  };
+// function keyboard(keyCode) {
+//   var key = {};
+//   key.code = keyCode;
+//   key.isDown = false;
+//   key.isUp = true;
+//   key.press = undefined;
+//   key.release = undefined;
+//   //The `downHandler`
+//   key.downHandler = function(event) {
+//     if (event.keyCode === key.code) {
+//       if (key.isUp && key.press) key.press();
+//       key.isDown = true;
+//       key.isUp = false;
+//     }
+//     event.preventDefault();
+//   };
 
-  //The `upHandler`
-  key.upHandler = function(event) {
-    if (event.keyCode === key.code) {
-      if (key.isDown && key.release) key.release();
-      key.isDown = false;
-      key.isUp = true;
-    }
-    event.preventDefault();
-  };
+//   //The `upHandler`
+//   key.upHandler = function(event) {
+//     if (event.keyCode === key.code) {
+//       if (key.isDown && key.release) key.release();
+//       key.isDown = false;
+//       key.isUp = true;
+//     }
+//     event.preventDefault();
+//   };
 
-  //Attach event listeners
-  window.addEventListener(
-    "keydown", key.downHandler.bind(key), false
-  );
-  window.addEventListener(
-    "keyup", key.upHandler.bind(key), false
-  );
-  return key;
-}
+//   //Attach event listeners
+//   document.addEventListener(
+//     "keydown", key.downHandler.bind(key), false
+//   );
+//   document.addEventListener(
+//     "keyup", key.upHandler.bind(key), false
+//   );
+//   return key;
+// }

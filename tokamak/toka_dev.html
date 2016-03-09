@@ -8,12 +8,12 @@
     <script src="../bower_components/katex/dist/katex.min.js"></script>
     <script src="../bower_components/jquery/dist/jquery.min.js"></script>
     <script src="../bower_components/pixi/bin/pixi.min.js"></script>
-    <script src="../bower_components/pixi/bin/pixi.min.js"></script>
     <script src="../bower_components/dat.gui/dat.gui.js"></script>
     <script src="../bower_components/stats.js/build/stats.min.js"></script>
     <script src="../bower_components/jquery/dist/jquery.min.js"></script>
     <!--<script src="../tink/bin/tink.js"></script>-->
     <script src="../PIXI.draggable/bin/pixi.draggable.js"></script>
+    <script src="../PIXI.Input-master/bin/pixi.input.js"></script>
     <!--<script src="../sound.js/sound.js"></script>-->
     <script src="../howler.js/howler.js"></script>
     <script src="../libs/util/TweenMax.min.js"></script>
@@ -25,6 +25,8 @@
     <script src="./intro.js"></script>
     <script src="./play.js"></script>
     <script src="./endgame.js"></script>
+    <script src="./createModals.js"></script>
+    <script src="./pixi.draggable.releaseAll.js"></script>
 </head>
 
 <body>
@@ -95,6 +97,20 @@
             state : false,
             timer : 0
         },
+        modal : {
+            coils : false,
+            vessel : false,
+            centerStack : false,
+            aux : false,
+            blanket : false,
+            tritium : false,
+            heat : false,
+            steam : false,
+            city : false,
+            temperature : false,
+            electric : false,
+            score : false
+        },
         reactor : true,
         exchanger : false,
         city : false
@@ -113,11 +129,13 @@
     var disruptions = 0;
     var maxDisruptions = 3;
     var highScore = 0;
+    // var keyObject = keyboard(asciiKeyCodeNumber);
 
 
 
-    //PIXI start
-
+    // //PIXI start
+    // var PIXI = require('../pixi.js');
+    // var keyboard = require('pixi-keyboard');
     var stage = new PIXI.Container(),
         renderer = PIXI.autoDetectRenderer(1010,660,{
             view : document.getElementById("game-canvas"),
@@ -145,8 +163,15 @@
     var container = new PIXI.Container();
     var coilcontainer = new PIXI.Container();
     var topControls = new PIXI.Container();
+    var tokaModals = new PIXI.Container();
     var exchangerContainer = new PIXI.Container();
+    var exchangerSquaresContainer = new PIXI.Container();
+    var exchangerLinesContainer = new PIXI.Container();
+    var exchangerBlanketContainer = new PIXI.Container();
+    var exchangerModals = new PIXI.Container();
     var cityContainer = new PIXI.Container();
+    var citySubcontainer = new PIXI.Container();
+    var cityModals = new PIXI.Container();
     var alertContainer = new PIXI.Container();
     var endContainer = new PIXI.Container();
 
@@ -165,10 +190,17 @@
     reactorTop.addChild(vessel);
     reactorTop.addChild(container);
     reactorTop.addChild(coilcontainer);
-    reactorTop.addChild(alertContainer);
-    gameContainer.addChild(topControls);
+    reactorTop.addChild(tokaModals);
     gameContainer.addChild(exchangerContainer);
+    exchangerContainer.addChild(exchangerSquaresContainer);
+    exchangerContainer.addChild(exchangerLinesContainer);
+    exchangerContainer.addChild(exchangerBlanketContainer);
+    exchangerContainer.addChild(exchangerModals);
     gameContainer.addChild(cityContainer);
+    cityContainer.addChild(citySubcontainer);
+    cityContainer.addChild(cityModals);
+    gameContainer.addChild(topControls);
+    gameContainer.addChild(alertContainer);
     stage.addChild(endContainer);
     introContainer.visible = false;
     gameContainer.visible = false;

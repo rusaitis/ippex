@@ -82,6 +82,7 @@ function setup() {
         antennaMask.beginFill(0x8bc5ff, 0.4);
         antennaMask.drawRect(antennaPos[0],antennaPos[1],antennaPos[2],antennaPos[3]);
 
+
         // antenna2.moveTo(torCenter.x+Math.cos(0.25)*Machine.diam/2,torCenter.y+Math.sin(0.25)*Machine.diam/2);
         // antenna2.lineStyle(2,0x7e7e7e7e);
         // antenna2.arc(torCenter.x , torCenter.y , Machine.diam/2 , Math.PI - rad , Math.PI + rad);
@@ -90,7 +91,7 @@ function setup() {
         // antenna2.lineTo(torCenter.x-Math.cos(rad)*Machine.diam/2,torCenter.y+Math.sin(rad)*Machine.diam/2);
 
         // antenna2.drawRect(550,torCenter.y-50,100,100);
-        stage.addChild(antennaMask);
+        // stage.addChild(antennaMask);
 
         antennaTop = new PIXI.Sprite(id["antenna_top.png"]);
         antennaTop.position.set(antennaPos[0],antennaPos[1]);
@@ -107,9 +108,18 @@ function setup() {
 
 
 
-        antennaPurple = new PIXI.Sprite(id["antennaPurple.png"]);
-        antennaPurple.anchor.set(0.5,0.5);
-        antennaPurple.position.set(torCenter.x-264,torCenter.y);
+
+        // antennaPurple = new PIXI.Sprite(id["antennaPurple.png"]);
+        // antennaPurple.anchor.set(0.5,0.5);
+        // antennaPurple.position.set(torCenter.x-264,torCenter.y);
+
+        antennaRed = new PIXI.Sprite(id["antennaRed.png"]);
+        antennaRed.position.set(antennaPos[0],antennaPos[1]);
+        antennaRed.visible = false;
+        antennaRed.alpha = 0.75;
+        rfCover.addChild(antennaRed);
+ 
+
         // stage.addChild(antennaPurple);
         // rfContainer.addChild(antenna);
         // stage.addChild(wave);
@@ -130,6 +140,12 @@ function setup() {
         allcoilsglow.position.set(torCenter.x,torCenter.y);
         coilcontainer.addChild(allcoilsglow);
         allcoilsglow.alpha = 1;
+
+        coilsRed = new PIXI.Sprite(id["coilsRed.png"]);
+        coilsRed.anchor.set(0.5,0.5);
+        coilsRed.position.set(torCenter.x,torCenter.y);
+        coilcontainer.addChild(coilsRed);
+        coilsRed.visible = false;
 
 
 
@@ -597,6 +613,8 @@ function setup() {
         betaLimitText.visible = true;
         alertContainer.addChild(betaLimitText);
 
+
+
         muteBut = new PIXI.Sprite(id["audio.png"]);
         muteBut.anchor.set(0.5,0.5);
         muteBut.position.set(40,640);
@@ -605,14 +623,63 @@ function setup() {
 
         buttonizeHold(muteBut);
 
-        exchangerSprite = new PIXI.Sprite(id["exchanger.png"]);
-        exchangerSprite.position.set(96.4,136.34);
-        exchangerContainer.addChild(exchangerSprite);
+
+
+        exchangerSquaresSprite = new PIXI.Sprite(id["exchangerSquares.png"]);
+        exchangerSquaresSprite.position.set(328.1,250.7);
+        exchangerSquaresContainer.addChild(exchangerSquaresSprite);
+
+        tritiumRed = new PIXI.Sprite(id["tritiumRed.png"]);
+        tritiumRed.position.set(328.1,259);
+        exchangerSquaresContainer.addChild(tritiumRed);
+        tritiumRed.visible = false;        
+
+        heatRed = new PIXI.Sprite(id["heatRed.png"]);
+        heatRed.position.set(462.5,257.78);
+        exchangerSquaresContainer.addChild(heatRed); 
+        heatRed.visible = false;
+
+        steamRed = new PIXI.Sprite(id["steamRed.png"]);
+        steamRed.position.set(713.3,251.5);
+        exchangerSquaresContainer.addChild(steamRed);
+        steamRed.visible = false;
+
+        exchangerLinesSprite = new PIXI.Sprite(id["exchangerLines.png"]);
+        exchangerLinesSprite.position.set(178.4,146.3);
+        exchangerLinesContainer.addChild(exchangerLinesSprite);
+
+        exchangerBlanketSprite = new PIXI.Sprite(id["exchangerBlanket.png"]);
+        exchangerBlanketSprite.position.set(96.4,206.73);
+        exchangerBlanketContainer.addChild(exchangerBlanketSprite);
+
+        redBlanket = new PIXI.Sprite(id["redBlanket.png"]);
+        redBlanket.position.set(96.4,206.73);
+        exchangerBlanketContainer.addChild(redBlanket);
+        redBlanket.visible = false;
 
 
         citySprite = new PIXI.Sprite(id["city.png"]);
         citySprite.position.set(405.3,174);
-        cityContainer.addChild(citySprite);
+        citySubcontainer.addChild(citySprite);
+
+        cityRed = new PIXI.Sprite(id["cityRed.png"]);
+        cityRed.position.set(405.3,174);
+        citySubcontainer.addChild(cityRed);
+        cityRed.visible = false;
+
+
+
+        createModals();
+
+        document.addEventListener('keydown', onKeyDown);
+
+        function onKeyDown(key) {
+            if (key.keyCode == 77) {
+                if (stateVar.modal.vessel) window.open("http://www.google.com");
+                if (stateVar.modal.centerStack) window.open("http://www.facebook.com");
+
+            }
+        }
 
 
 
