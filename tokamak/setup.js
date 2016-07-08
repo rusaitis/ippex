@@ -496,10 +496,11 @@ function setup() {
 
         scoreText = new PIXI.Text("Score:");
         scoreText.style = {fill:"white", font:"40px calibri"};
-        // scoreText.text = "Density: ";
         scoreText.anchor.set(0,1);
         scoreText.position.set(contPos.box.pos[0] + contPos.outputLeft , contPos.box.pos[1] + contPos.scoreBot);
         controls.addChild(scoreText);
+
+
 
         tempNum = new PIXI.Text("");
         tempNum.style = {fill:"white", font:"20px calibri"};
@@ -584,6 +585,7 @@ function setup() {
         topControls.addChild(reactorBut);
         reactorBut.txt = "reactor";
         buttonizeViews(reactorBut);
+        
 
         exchangerBut = new PIXI.Sprite(id["exchangerButOff.png"]);
         exchangerBut.position.set(topControlPos.exchangerX,topControlPos.y);
@@ -671,15 +673,7 @@ function setup() {
 
         createModals();
 
-        document.addEventListener('keydown', onKeyDown);
 
-        function onKeyDown(key) {
-            if (key.keyCode == 77) {
-                if (stateVar.modal.vessel) window.open("http://www.google.com");
-                if (stateVar.modal.centerStack) window.open("http://www.facebook.com");
-
-            }
-        }
 
 
 

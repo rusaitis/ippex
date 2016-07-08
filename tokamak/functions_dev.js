@@ -139,7 +139,6 @@ obj
 }
 
 function pressedfunViews() {
-  if (!buttonState[this.txt]) {
     if (this.txt == "reactor") {
       stateVar[this.txt] = true;
       stateVar["exchanger"] = false;
@@ -155,19 +154,17 @@ function pressedfunViews() {
       stateVar["exchanger"] = false;
       stateVar["reactor"] = false;
     }
-  }
 
   buttonState[this.txt] = true;
   // console.log("pressed "+ buttonState[this.txt]);
 }
 function releasedfunViews() {
-  buttonState[this.txt] = false;
+  stateVar.modal[this.txt] = false;
     // console.log("released" + buttonState[this.txt]);
 }
 
 function overfunViews() {
-    // this.defaultCursor = 'pointer';
-    // console.log("I'm over "+buttonState[this.txt]);
+  stateVar.modal[this.txt] = true;
 }
 
 
@@ -275,10 +272,8 @@ obj.interactive = true;
 obj.buttonMode = true;
 obj
     .on('mouseover', overfunModal)
-    .on('mouseup', releasedfunModal)
-    .on('mousedown', pressedfunModal)
-    .on('touchstart',pressedfunModal)
-    .on('touchend', releasedfunModal)
+    .on('mousedown', overfunModal)
+    .on('touchstart',overfunModal)
     .on('mouseout', releasedfunModal)
     .on('touchendoutside',releasedfunModal);
 }
@@ -331,6 +326,31 @@ function arrowReleased() {
     var txt = (this.para2.dir == 'up') ? "upred.png" : "downred.png";
     this.texture = PIXI.loader.resources.numbersred.textures[txt];
     this.defaultCursor = 'pointer';
+}
+
+function viewButtonTexture() {
+  reactorBut.texture = id["reactorButOff.png"];
+  exchangerBut.texture = id["exchangerButOff.png"];
+  cityBut.texture = id["cityButOff.png"];
+  if (stateVar.reactor) {
+      reactorBut.texture = id["reactorButOn.png"];
+  }
+  if (stateVar.exchanger) {
+      exchangerBut.texture = id["exchangerButOn.png"];
+  }
+  if (stateVar.city) {
+      cityBut.texture = id["cityButOn.png"];
+  }
+  if (stateVar.modal.reactor) {
+      reactorBut.texture = id["redReactorButton.png"];
+  }
+  if (stateVar.modal.exchanger) {
+      exchangerBut.texture = id["redExchangerButton.png"];
+  }
+  if (stateVar.modal.city) {
+      cityBut.texture = id["redCityButton.png"];
+  }
+
 }
 
 

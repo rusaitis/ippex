@@ -4,7 +4,7 @@
         <key>fileFormatVersion</key>
         <int>3</int>
         <key>texturePackerVersion</key>
-        <string>4.0.2</string>
+        <string>4.1.0</string>
         <key>fileName</key>
         <string>/Users/adomingu/Google Drive/Github/ippex/tokamak/img/ippexsprites.tps</string>
         <key>autoSDSettings</key>
@@ -72,7 +72,7 @@
             </struct>
         </struct>
         <key>shapePadding</key>
-        <uint>0</uint>
+        <uint>10</uint>
         <key>jpgQuality</key>
         <uint>80</uint>
         <key>pngOptimizationLevel</key>
@@ -187,9 +187,95 @@
             <int>200</int>
             <key>heuristicMask</key>
             <false/>
-            <key>pivotPoint</key>
-            <enum type="SpriteSettings::PivotPoint">Center</enum>
+            <key>defaultPivotPoint</key>
+            <point_f>0.5,0.5</point_f>
+            <key>writePivotPoints</key>
+            <false/>
         </struct>
+        <key>individualSpriteSettings</key>
+        <map type="IndividualSpriteSettingsMap">
+            <key type="filename">antenna.png</key>
+            <key type="filename">antennaGreen.png</key>
+            <key type="filename">antennaPurple.png</key>
+            <key type="filename">antennaRed.png</key>
+            <key type="filename">antenna_top.png</key>
+            <key type="filename">audio.png</key>
+            <key type="filename">blueArrowLeft.png</key>
+            <key type="filename">blueArrowLine.png</key>
+            <key type="filename">blueArrowRight.png</key>
+            <key type="filename">blueSlide.png</key>
+            <key type="filename">bottomLines.png</key>
+            <key type="filename">city.png</key>
+            <key type="filename">cityButOff.png</key>
+            <key type="filename">cityButOn.png</key>
+            <key type="filename">cityRed.png</key>
+            <key type="filename">coilsRed.png</key>
+            <key type="filename">coils_all4.png</key>
+            <key type="filename">coils_all4_glow.png</key>
+            <key type="filename">controlBox.png</key>
+            <key type="filename">exchanger.png</key>
+            <key type="filename">exchangerBlanket.png</key>
+            <key type="filename">exchangerButOff.png</key>
+            <key type="filename">exchangerButOn.png</key>
+            <key type="filename">exchangerLines.png</key>
+            <key type="filename">exchangerSquares.png</key>
+            <key type="filename">glowcoils_whiter.png</key>
+            <key type="filename">greenArrowLeft.png</key>
+            <key type="filename">greenArrowLine.png</key>
+            <key type="filename">greenArrowRight.png</key>
+            <key type="filename">greenSlide.png</key>
+            <key type="filename">heatRed.png</key>
+            <key type="filename">highScore.png</key>
+            <key type="filename">innerWall.png</key>
+            <key type="filename">innerWallDanger.png</key>
+            <key type="filename">introManual.png</key>
+            <key type="filename">lifeBar.png</key>
+            <key type="filename">lifeBarDanger.png</key>
+            <key type="filename">lifeBarShell.png</key>
+            <key type="filename">modalAux.png</key>
+            <key type="filename">modalBlanket.png</key>
+            <key type="filename">modalCentralSolenoid.png</key>
+            <key type="filename">modalCity.png</key>
+            <key type="filename">modalExchanger.png</key>
+            <key type="filename">modalHeat.png</key>
+            <key type="filename">modalMagnet.png</key>
+            <key type="filename">modalReactor.png</key>
+            <key type="filename">modalSteam.png</key>
+            <key type="filename">modalTritium.png</key>
+            <key type="filename">modalVessel.png</key>
+            <key type="filename">mute.png</key>
+            <key type="filename">outerWall.png</key>
+            <key type="filename">outerWallDanger.png</key>
+            <key type="filename">outroText1.png</key>
+            <key type="filename">outroText2.png</key>
+            <key type="filename">particle.png</key>
+            <key type="filename">purpleArrowLeft.png</key>
+            <key type="filename">purpleArrowLine.png</key>
+            <key type="filename">purpleArrowRight.png</key>
+            <key type="filename">purpleSlide.png</key>
+            <key type="filename">reactorButOff.png</key>
+            <key type="filename">reactorButOn.png</key>
+            <key type="filename">reactor_lines.png</key>
+            <key type="filename">redBlanket.png</key>
+            <key type="filename">redCityButton.png</key>
+            <key type="filename">redExchangerButton.png</key>
+            <key type="filename">redReactorButton.png</key>
+            <key type="filename">restartButClicked.png</key>
+            <key type="filename">restartButHover.png</key>
+            <key type="filename">restartButOff.png</key>
+            <key type="filename">startButClicked.png</key>
+            <key type="filename">startButHover.png</key>
+            <key type="filename">startButOff.png</key>
+            <key type="filename">startTitle.png</key>
+            <key type="filename">steamRed.png</key>
+            <key type="filename">topLines.png</key>
+            <key type="filename">tritiumRed.png</key>
+            <key type="filename">wave_purple.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+            </struct>
+        </map>
         <key>fileList</key>
         <array>
             <filename>antenna_top.png</filename>
@@ -245,7 +331,6 @@
             <filename>exchanger.png</filename>
             <filename>highScore.png</filename>
             <filename>glowcoils_whiter.png</filename>
-            <filename>modaltest.png</filename>
             <filename>antennaRed.png</filename>
             <filename>coilsRed.png</filename>
             <filename>redBlanket.png</filename>
@@ -256,6 +341,20 @@
             <filename>steamRed.png</filename>
             <filename>tritiumRed.png</filename>
             <filename>cityRed.png</filename>
+            <filename>redExchangerButton.png</filename>
+            <filename>redCityButton.png</filename>
+            <filename>redReactorButton.png</filename>
+            <filename>modalMagnet.png</filename>
+            <filename>modalAux.png</filename>
+            <filename>modalCentralSolenoid.png</filename>
+            <filename>modalVessel.png</filename>
+            <filename>modalReactor.png</filename>
+            <filename>modalExchanger.png</filename>
+            <filename>modalCity.png</filename>
+            <filename>modalBlanket.png</filename>
+            <filename>modalTritium.png</filename>
+            <filename>modalSteam.png</filename>
+            <filename>modalHeat.png</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

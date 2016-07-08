@@ -152,9 +152,6 @@ function play() {
         lifeBar.width = lifeBarPos.barSize[0] * (1/11 + 10/11 * (maxDisruptions - 1 - disruptions)/(maxDisruptions - 1));
 
         if (stateVar.reactor) {
-            reactorBut.texture = id["reactorButOn.png"];
-            exchangerBut.texture = id["exchangerButOff.png"];
-            cityBut.texture = id["cityButOff.png"];
             reactorBot.visible = true;
             reactorTop.visible = true;
             // tokaContainer.visible = true;
@@ -163,9 +160,6 @@ function play() {
         }
 
         if (stateVar.exchanger) {
-            reactorBut.texture = id["reactorButOff.png"];
-            exchangerBut.texture = id["exchangerButOn.png"];
-            cityBut.texture = id["cityButOff.png"];
             reactorBot.visible = false;
             reactorTop.visible = false;
             // tokaContainer.visible = false;
@@ -173,99 +167,20 @@ function play() {
             cityContainer.visible = false;
         }
         if (stateVar.city) {
-            reactorBut.texture = id["reactorButOff.png"];
-            exchangerBut.texture = id["exchangerButOff.png"];
-            cityBut.texture = id["cityButOn.png"];
             reactorBot.visible = false;
             reactorTop.visible = false;
             // tokaContainer.visible = false;
             exchangerContainer.visible = false;
             cityContainer.visible = true;
         }
+        viewButtonTexture();
 
         muteBut.texture = (stateVar.mute) ? id["mute.png"] : id["audio.png"];
         if (stateVar.mute) Howler.mute(); else Howler.unmute();
+
+        workModals(); //Makes the modals turn on when hovering over them
      
 
-
-        if (stateVar.modal.vessel) {
-            outerWallDanger.alpha = 1;
-            innerWallDanger.alpha = 0;
-            modalVessel.visible = true;
-        } else {
-            modalVessel.visible = false;
-        }
-
-        if (stateVar.modal.centerStack) {
-            modalRight.visible = true;
-            outerWallDanger.alpha = 0;
-            innerWallDanger.alpha = 1;
-        } else {
-            modalRight.visible = false;
-        }
-        if (stateVar.modal.aux) {
-            antennaRed.visible = true;
-            modalRight.visible = true;
-            // modalCenterStack.visible = true;
-        } else {
-            modalRight.visible = false;
-            antennaRed.visible = false;
-            // modalCenterStack.visible = false;
-        }
-        if (stateVar.modal.coils) {
-            modalRight.visible = true;
-            coilsRed.visible = true;
-            // modalCenterStack.visible = true;
-        } else {
-            modalRight.visible = false;
-            coilsRed.visible = false;
-            // modalCenterStack.visible = false;
-        }
-        if (stateVar.modal.tritium) {
-            modalRight.visible = true;
-            tritiumRed.visible = true;
-            // modalCenterStack.visible = true;
-        } else {
-            modalRight.visible = false;
-            tritiumRed.visible = false;
-            // modalCenterStack.visible = false;
-        }
-        if (stateVar.modal.heat) {
-            modalRight.visible = true;
-            heatRed.visible = true;
-            // modalCenterStack.visible = true;
-        } else {
-            modalRight.visible = false;
-            heatRed.visible = false;
-            // modalCenterStack.visible = false;
-        }
-        if (stateVar.modal.steam) {
-            modalLeft.visible = true;
-            steamRed.visible = true;
-            // modalCenterStack.visible = true;
-        } else {
-            modalLeft.visible = false;
-            steamRed.visible = false;
-            // modalCenterStack.visible = false;
-        }
-        if (stateVar.modal.blanket) {
-            modalRight.visible = true;
-            redBlanket.visible = true;
-            // modalCenterStack.visible = true;
-        } else {
-            modalRight.visible = false;
-            redBlanket.visible = false;
-            // modalCenterStack.visible = false;
-        }
-        if (stateVar.modal.city) {
-            modalCity.visible = true;
-            cityRed.visible = true;
-            // modalCenterStack.visible = true;
-        } else {
-            modalCity.visible = false;
-            cityRed.visible = false;
-            // modalCenterStack.visible = false;
-        }
 
         // bisecBut.texture = (stateVar.bisec) ? id["buttonOn.png"] : id["buttonOff.png"];
         // if (densBut.x > contPos.densSlider.pos[0] + contPos.arrowWidth + contPos.buffer + contPos.sliderBoxLength/2) 

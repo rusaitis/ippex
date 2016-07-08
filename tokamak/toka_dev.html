@@ -106,12 +106,16 @@
             tritium : false,
             heat : false,
             steam : false,
-            city : false,
+            cityscape : false,
+            health : false,
             temperature : false,
             electric : false,
-            score : false
+            score : false,
+            reactor : false,
+            exchanger : false,
+            city : false,
         },
-        reactor : true,
+        reactor : false,
         exchanger : false,
         city : false
     };
@@ -173,6 +177,7 @@
     var citySubcontainer = new PIXI.Container();
     var cityModals = new PIXI.Container();
     var alertContainer = new PIXI.Container();
+    var topModals = new PIXI.Container();
     var endContainer = new PIXI.Container();
 
 
@@ -200,8 +205,13 @@
     cityContainer.addChild(citySubcontainer);
     cityContainer.addChild(cityModals);
     gameContainer.addChild(topControls);
+    gameContainer.addChild(topModals);
     gameContainer.addChild(alertContainer);
     stage.addChild(endContainer);
+    reactorBot.visible = true;
+    reactorTop.visible = true;
+    exchangerContainer.visible = false;
+    cityContainer.visible = false;
     introContainer.visible = false;
     gameContainer.visible = false;
     endContainer.visible = false;
